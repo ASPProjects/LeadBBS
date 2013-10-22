@@ -1,0 +1,1 @@
+<div class="swap_collapse" onclick="swap_view('master_part_100',this);"><span>Default</span></div><ul id="master_part_100"><li><a href="javascript:url_to(100);">Default Forum</A></li><li><a href="javascript:url_to(444);">Recycle</A></li></ul>

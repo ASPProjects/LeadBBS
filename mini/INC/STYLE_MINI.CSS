@@ -1,0 +1,76 @@
+body{font-size:9pt;font-family: "ËÎÌו"; line-height:1.8;}
+p{font-size:9pt;}
+td{font-size:9pt;}
+li{font-size:9pt;margin-left: 0pt;}
+ul{font-size:9pt;margin-left: 20pt;}
+textarea{font-size:9pt;}
+input{font-size:9pt;height:20;}
+select{font-size:9pt;height:20;}
+a{text-transform: none; text-decoration: none; color: #000000;}
+a:hover {color: #008800;}
+
+.TBHead{background-color:#666699;}
+.TBHead2{background-color:#666699;}
+.TBBG1{background-color:#eeeeee;}
+.TBBG9{background-color:#f7f7f7;}
+.TBone{background-color:#cccccc;}
+.TBtwo{background-color:#666699;}
+.TBthree{background-color:#e0e0e0;}
+.TBfour{background-color:#EEEEF3;}
+.TBtwofont{color:#666699;}
+
+.tbframebutton{background-color:#cccccc;}
+.TBframeBG{background-color:#e0e0e0;}
+.grayfont{COLOR:gray}
+.redfont{COLOR:red}
+.bluefont{COLOR:blue}
+.uname{font-family: Tahoma, Verdana;font-weight: bold;}
+.TBAnc{BACKGROUND-COLOR:#CCCCCC;}
+.TBBGAnc{BACKGROUND-COLOR:#FFFFFF;}
+
+
+.ldclear {
+	CLEAR: left; DISPLAY: block; FONT-SIZE: 1px; WIDTH: 0px; LINE-HEIGHT: 0px; HEIGHT: 0px
+}
+.ldmc {
+	POSITION: relative
+}
+.ldmc A {
+	DISPLAY: block; FLOAT: left; WHITE-SPACE: nowrap
+}
+.ldmc DIV A {
+	FLOAT: none
+}
+.ldmc DIV {
+	VISIBILITY: hidden; POSITION: absolute
+}
+#ld0 {
+	BACKGROUND-COLOR: transparent
+}
+#ld0 A {
+	PADDING-RIGHT: 6px; PADDING-LEFT: 6px; FONT-SIZE: 0.8em; PADDING-BOTTOM: 3px; COLOR: #000000; PADDING-TOP: 3px;FONT-FAMILY: ËÎÌו;FONT-SIZE:9pt; BACKGROUND-COLOR: #eeeeee; TEXT-DECORATION: none
+}
+#ld0 a:hover {
+	BACKGROUND-COLOR: #cccccc;color:#008800
+}
+#ld0 .ldactive {
+	BACKGROUND-COLOR: #cccccc! important; TEXT-DECORATION: none! important
+}
+#ld0 .ldparent {
+	BACKGROUND-POSITION: 95% 50%;BACKGROUND-REPEAT: no-repeat;MARGIN-TOP:2px; 
+}
+#ld0 DIV {
+	BORDER-RIGHT: #aaaaaa 1px solid; PADDING-RIGHT: 2px; BORDER-TOP: #aaaaaa 1px solid; MARGIN-TOP: -1px; PADDING-LEFT: 2px; PADDING-BOTTOM: 3px; BORDER-LEFT: #aaaaaa 1px solid; PADDING-TOP: 3px; BORDER-BOTTOM: #aaaaaa 1px solid; BACKGROUND-COLOR: #f7f7f7;
+}
+#ld0 DIV a:hover {
+	TEXT-DECORATION: none;color:#008800
+}
+#ld0 DIV .ldactive {
+	BACKGROUND-COLOR: #cccccc! important
+}
+#ld0 DIV .ldparent {
+	BACKGROUND-IMAGE: url(/images/ol/arrow_right.gif);
+}
+#ld0 DIV A {
+	PADDING-RIGHT: 12px;PADDING-LEFT: 5px; PADDING-BOTTOM: 2px;PADDING-TOP: 2px; BACKGROUND-COLOR: #f7f7f7
+}

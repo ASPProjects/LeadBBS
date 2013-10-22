@@ -1,0 +1,1 @@
+document.write("<script language=\"JavaScript\" src=\"bglist.js\"></script>");
