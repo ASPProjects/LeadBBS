@@ -7,9 +7,9 @@
 '=日    期：2012-01-02
 '==================================
 '转载时请保留以上内容！！
-Const apiKey = "100255523" 'APP ID,您需要从腾讯平台申请获取资料：(<a href=http://connect.qq.com/ target=_blank>点此申请</a>)
-Const secretKey = "cc1c8fc9734c3f37475766d01be9f6ec" 'APP KEY,您需要从腾讯平台申请获取
-Const callback = "www.leadbbs.co" 'CALL BACK,回调地址，注意只需要填写域名，不包括http及目录。
+Const apiKey = "" 'APP ID,您需要从腾讯平台申请获取资料：(<a href=http://connect.qq.com/ target=_blank>点此申请</a>)
+Const secretKey = "" 'APP KEY,您需要从腾讯平台申请获取
+Const callback = "" 'CALL BACK,回调地址，注意只需要填写域名，不包括http及目录。
 
 Class QqConnet
     Private QQ_OAUTH_CONSUMER_KEY
@@ -17,7 +17,7 @@ Class QqConnet
 	Private QQ_CALLBACK_URL
 	Private QQ_SCOPE
         
-    Private Sub Class_Initialize      
+    Private Sub Class_Initialize
         QQ_OAUTH_CONSUMER_KEY = apiKey
         QQ_OAUTH_CONSUMER_SECRET = secretKey
         QQ_CALLBACK_URL = callback & Request.Servervariables("SCRIPT_NAME")
@@ -66,12 +66,13 @@ Class QqConnet
 	'Post方法请求url,获取请求内容
 	Private Function RequestUrl_post(url,data)
 		dim XmlObj
-		Set XmlObj = Server.CreateObject(CheckXml())
+		'Set XmlObj = Server.CreateObject(CheckXml())
+		Set XmlObj = Server.CreateObject("Msxml2.ServerXMLHTTP.3.0")
 		XmlObj.open "POST", url, false
 		XmlObj.setrequestheader "POST"," /t/add_t HTTP/1.1"
-		XmlObj.setrequestheader "Host"," graph.qq.com "
-		XmlObj.setrequestheader "content-length ",len(data)  
-        XmlObj.setRequestHeader "Content-Type "," application/x-www-form-urlencoded "
+		XmlObj.setrequestheader "Host"," graph.qq.com"
+		XmlObj.setrequestheader "content-length",len(data)  
+      XmlObj.setRequestHeader "Content-Type"," application/x-www-form-urlencoded "
 		XmlObj.setrequestheader "Connection"," Keep-Alive"
         XmlObj.setrequestheader "Cache-Control"," no-cache"
         XmlObj.send(data)
@@ -105,6 +106,8 @@ Class QqConnet
 	
 	
 	'获取 access_token
+	'获取到的access token具有3个月有效期，用户再次登录时自动刷新。
+	'第三方网站可存储access token信息，以便后续调用OpenAPI访问和修改用户信息时使用。
 	Public Function GetAccess_Token()
 		Dim url, params,Temp
 		Url="https://graph.qq.com/oauth2.0/token"
@@ -151,13 +154,17 @@ Class QqConnet
 	End Function
 	
 	'发送一条微博
-	Public Function Post_Webo(content)
-		Dim url, params
+	Public Function Post_Webo(content,Access_Token,Access_Openid)
+		Dim url, params, Tk,Oid
+		Tk = Access_Token
+		Oid = Access_Openid
+		if Tk = "" then Tk = Session("Access_Token")
+		if Oid = "" then Oid = Session("Openid")
 		url = "https://graph.qq.com/t/add_t"
 		params = "oauth_consumer_key=" & QQ_OAUTH_CONSUMER_KEY
-		params = params & "&access_token=" & Session("Access_Token")
-		params = params & "&openid=" & Session("Openid")
-		params = params & "&content="&content
+		params = params & "&access_token=" & Tk
+		params = params & "&openid=" & Oid
+		params = params & "&content="&sim_urlencode(content)
         params = params & "&format=json"
 		Post_Webo = RequestUrl_post(url,params)
 	End Function
@@ -173,19 +180,29 @@ Class QqConnet
 		Post_add_topic = RequestUrl_post(url,params)
 	End Function
 	
+	private function sim_urlencode(str)
+	
+		sim_urlencode = replace(replace(replace(str,"&","%26"),"=","%3D"),VbCrLf," ")
+	
+	end function
+	
 	'分享内容到QQ空间
-	Public Function Post_Share(title,turl,comment,summary,images)
-		Dim url, params
+	Public Function Post_Share(title,turl,comment,summary,images,nswb,Access_Token,Access_Openid)
+		Dim url, params, Tk,Oid
+		Tk = Access_Token
+		Oid = Access_Openid
+		if Tk = "" then Tk = Session("Access_Token")
+		if Oid = "" then Oid = Session("Openid")
 		url = "https://graph.qq.com/share/add_share"
 		params = "oauth_consumer_key=" & QQ_OAUTH_CONSUMER_KEY
-		params = params & "&access_token=" & Session("Access_Token")
-		params = params & "&openid=" & Session("Openid")
-		params = params & "&title="&title
-		params = params & "&url="&turl
-		params = params & "&title="&title
-		params = params & "&comment="&comment
-		params = params & "&summary="&summary
-		params = params & "&images="&images
+		params = params & "&access_token=" & Tk
+		params = params & "&openid=" & Oid
+		params = params & "&title="&sim_urlencode(title)
+		params = params & "&url="&sim_urlencode(turl)
+		params = params & "&comment="&sim_urlencode(comment)
+		params = params & "&summary="&sim_urlencode(summary)
+		params = params & "&images="&sim_urlencode(images)
+		params = params & "&nswb="&sim_urlencode(nswb)
 		params = params & "&format=json"
 		Post_Share = RequestUrl_post(url,params)
 	End Function

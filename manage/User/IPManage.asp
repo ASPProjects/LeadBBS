@@ -206,7 +206,7 @@ Function LoginAccuessFul
 	</tr>
 	<%
 	If Num = -1 Then
-		response.write "<tr bgcolor=" & DEF_BBS_LightestColor & " class=TBfour><td colspan=6 height=30>&nbsp; 没有任何屏蔽ＩＰ地址，<a href=NewForbidIP.asp>点击这里添加新屏蔽ＩＰ地址</a>。</td></tr>"
+		response.write "<tr class=TBfour><td colspan=6 height=30>&nbsp; 没有任何屏蔽ＩＰ地址，<a href=NewForbidIP.asp>点击这里添加新屏蔽ＩＰ地址</a>。</td></tr>"
 	end if
 
 	Dim TempN

@@ -84,7 +84,7 @@ Function DisplayDatabaseLink
 	Dim n,m
 	%>
 	<table border=0 cellpadding=5 cellspacing=1 width="100%" bgcolor="<%=DEF_BBS_LightColor%>" class=TBBG1>
-	<tr bgcolor=<%=DEF_BBS_LightestColor%> class=TBBG9>
+	<tr class=TBBG9>
 		<td valign=top><b>ฑํว้ืขสอ</b></td>
 		<td>
 			<table border=0 cellpadding=1 cellspacing=0>

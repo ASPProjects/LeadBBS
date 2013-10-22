@@ -62,7 +62,7 @@ Sub Proxy_Main
 
 	Dim MyProxy
 	Set MyProxy = New Proxy_Class
-	MyProxy.GetBody(Request.QueryString("u"))
+	MyProxy.GetBody(filterUrlstr(Request.QueryString("u")))
 	Set MyProxy = Nothing
 
 End Sub

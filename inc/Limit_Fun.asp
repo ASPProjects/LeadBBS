@@ -284,36 +284,36 @@ Sub CheckAccessLimit
 		End If
 		If GBL_Board_ForumPass <> DecodeCookie(Left(Request.Cookies(DEF_MasterCookies & "_" & GBL_UserID)("Board_" & GBL_board_ID),255)) Then
 			GBL_CHK_TempStr = GBL_CHK_TempStr & " " & VbCrLf
-			%>
-			<div class="alertbox">
-			<%
-			Dim ForumPass
-			If Request("submitflag") <> "" Then
-				ForumPass = Request.Form("ForumPass")
-				Dim NumCheck
-				NumCheck = CheckRndNumber
-				If ForumPass = GBL_Board_ForumPass and NumCheck = 1 Then
-					Response.Cookies(DEF_MasterCookies & "_" & GBL_UserID)("Board_" & GBL_board_ID) = CodeCookie(ForumPass)
-					Response.Cookies(DEF_MasterCookies & "_" & GBL_UserID).Expires = DEF_Now + 365
-					Response.Cookies(DEF_MasterCookies & "_" & GBL_UserID).Domain = DEF_AbsolutHome
-					Response.Write "<span class=""title greenfont"">登录成功</span>"
-					Response.Write "<br /><br />-- 返回 <a href=""http://" & Request.ServerVariables("SERVER_NAME")&Request.ServerVariables("URL") & "?" & Request.QueryString & """>" & htmlencode(Request.ServerVariables("SERVER_NAME")&Request.ServerVariables("URL")) & "</a>" & VbCrLf
-				Else
-					If NumCheck = 0 Then
-						Response.Write "<span class=""alert redfont"">验证码填写错误!</span>" & VbCrLf
+				%>
+				<div class="alertbox">
+				<%
+				Dim ForumPass
+				If Request("submitflag") <> "" Then
+					ForumPass = Request.form("ForumPass")
+					Dim NumCheck
+					NumCheck = CheckRndNumber
+					If ForumPass = GBL_Board_ForumPass and NumCheck = 1 Then
+						Response.Cookies(DEF_MasterCookies & "_" & GBL_UserID)("Board_" & GBL_board_ID) = CodeCookie(ForumPass)
+						Response.Cookies(DEF_MasterCookies & "_" & GBL_UserID).Expires = DEF_Now + 365
+						Response.Cookies(DEF_MasterCookies & "_" & GBL_UserID).Domain = DEF_AbsolutHome
+						Response.Write "<span class=""title greenfont"">登录成功</span>"
+						Response.Write "<br /><br />-- 返回 <a href=""http://" & Request.ServerVariables("SERVER_NAME")&Request.ServerVariables("URL") & "?" & Request.QueryString & """>" & htmlencode(Request.ServerVariables("SERVER_NAME")&Request.ServerVariables("URL")) & "</a>" & VbCrLf
 					Else
-						Response.Write "<span class=""alert redfont"">您的密码错误!</span>" & VbCrLf
+						If NumCheck = 0 Then
+							Response.Write "<span class=""alert redfont"">验证码填写错误!</span>" & VbCrLf
+						Else
+							Response.Write "<span class=""alert redfont"">您的密码错误!</span>" & VbCrLf
+						End If
+						Call LDExeCute("Update LeadBBS_User Set LastWriteTime=" & GetTimeValue(DEF_Now) & " where ID=" & GBL_UserID,1)
+						DisplayPassWordLoginForm
 					End If
-					Call LDExeCute("Update LeadBBS_User Set LastWriteTime=" & GetTimeValue(DEF_Now) & " where ID=" & GBL_UserID,1)
+				Else
+					Response.Write "<span class=""title"">此论坛为加密论坛，请输入正确的验证信息：</span>" & VbCrLf
 					DisplayPassWordLoginForm
 				End If
-			Else
-				Response.Write "<span class=""title"">此论坛为加密论坛，请输入正确的验证信息：</span>" & VbCrLf
-				DisplayPassWordLoginForm
-			End If
-			%>
-		<%
-			Exit Sub
+				%>
+			<%
+				Exit Sub
 		End If
 	End If
 
@@ -335,7 +335,7 @@ Function CheckRndNumber
 
 	Dim ForumNumber
 	If dontRequestFormFlag = "" Then
-		ForumNumber = Left(Request.Form("ForumNumber"),4)
+		ForumNumber = Left(Request.form("ForumNumber"),4)
 	Else
 		ForumNumber = Left(GetFormData("ForumNumber"),4)
 	End If
@@ -376,7 +376,10 @@ End Sub%>
 Sub displayVerifycode
 
 	Dim Url
-	Url = Left(Request.QueryString("dir"),100)
+	Url = filterUrlstr(Left(Request.QueryString("dir"),100))
+	if Url = "" and dontRequestFormFlag = "" then
+		Url = filterUrlstr(Left(Request.form("dir"),100))
+	end if
 	If Url = "" Then
 		Url = DEF_BBS_HomeUrl
 	End If

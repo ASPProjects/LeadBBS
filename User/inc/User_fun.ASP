@@ -7,9 +7,9 @@ Dim Form_Prevtime,Form_Userphoto,Form_IP,Form_UserLevel,Form_Homepage,Form_Under
 Dim Form_Officer,Form_Points
 Dim Form_Password1,Form_Password2,Form_byear,Form_bday,Form_bmonth
 Dim Form_FaceHeight,Form_FaceWidth,Form_FaceUrl,Form_ShowFlag,Form_NotSecret
-Dim Form_Question,Form_Answer,Form_UserTitle
+Dim Form_Question,Form_Answer,Form_UserTitle,OLd_Form_Question,OLd_Form_Answer,OLd_Form_UserName
 Dim Form_FaceUrl_Old,Form_FaceWidth_Old,Form_FaceHeight_Old,Form_RegVerifyAnswer
-Dim Form_App_AppType,Form_App_appid,For_App_GuestName
+Dim Form_App_AppType,Form_App_appid,Form_App_GuestName,Form_App_Token
 
 Rem =====初始化变量=====
 Form_Sex = 0
@@ -63,6 +63,11 @@ Function checkFormData
 		Form_UserName = Left(Trim(GetFormData("Form_UserName")),20)
 		Form_RegVerifyAnswer = GetFormData("Form_RegVerifyAnswer")
 	End If
+	
+	rem 绑定网站登录修改验证
+	If Old_Form_Answer = "" Then
+		Form_UserName = Left(Trim(GetFormData("Form_UserName")),20)		
+	End if
 	
 	Select Case Form_Action
 		Case "uploadface":
@@ -234,7 +239,7 @@ Function checkFormData
 			End If
 		
 			Dim TempURL,Loop_N
-			If ApplyFlag = 1 Then
+			If ApplyFlag = 1 or Old_Form_Answer = "" Then
 				If Form_UserName="" Then
 					GBL_CHK_TempStr = "请输入用户名!<br>"
 					GBL_CHK_Flag = 0
@@ -394,11 +399,13 @@ Function checkFormData
 						End If
 					Next
 					
-					If LMT_RegVerifyQuestion <> "" and LCase(Form_RegVerifyAnswer) <> LCase(LMT_RegVerifyAnswer) Then
-						GBL_CHK_TempStr = "注册验证信息错误!<br>"
-						GBL_CHK_Flag = 0
-						Exit Function
-					End If
+					If ApplyFlag = 1 then
+						If LMT_RegVerifyQuestion <> "" and LCase(Form_RegVerifyAnswer) <> LCase(LMT_RegVerifyAnswer) Then
+							GBL_CHK_TempStr = "注册验证信息错误!<br>"
+							GBL_CHK_Flag = 0
+							Exit Function
+						End If
+					end if
 				End If
 				
 				If inStr(Form_UserName," ") Then Form_UserName = Replace(Form_UserName,"  "," ")
@@ -456,19 +463,23 @@ Function checkFormData
 					Exit Function
 				End If
 				
-				
-				If reg_action = "bind" and reg_command = "reg" Then
-					If reg_checkAppidBinded = 0 Then
+				If ApplyFlag = 1 then
+					If reg_action = "bind" and reg_command = "reg" Then
+						If reg_checkAppidBinded = 0 Then
+							GBL_CHK_Flag = 0
+							Exit Function
+						End If
+					End If
+				end if
+			End If
+			If ApplyFlag = 0 or Old_Form_Answer = "" Then
+				If Old_Form_Answer <> "" Then
+				Form_Pass = GetFormData("oldpass")
+					If Form_Pass <> GBL_CHK_Pass and MD5(Form_Pass) <> GBL_CHK_Pass and Mid(MD5(Form_Pass),9,16) <> GBL_CHK_Pass Then
+						GBL_CHK_TempStr = "旧的密码错误，无法完成修改!<br>"
 						GBL_CHK_Flag = 0
 						Exit Function
 					End If
-				End If
-			Else
-				Form_Pass = GetFormData("oldpass")
-				If Form_Pass <> GBL_CHK_Pass and MD5(Form_Pass) <> GBL_CHK_Pass and Mid(MD5(Form_Pass),9,16) <> GBL_CHK_Pass Then
-					GBL_CHK_TempStr = "旧的密码错误，无法完成修改!<br>"
-					GBL_CHK_Flag = 0
-					Exit Function
 				End If
 				If GBL_BoardMasterFlag >= 4 Then
 					If Len(Form_Pass) < DEF_UserShortestPasswordMaster and Len(Form_Password2) < DEF_UserShortestPasswordMaster Then
@@ -655,7 +666,7 @@ Function checkFormData
 			
 			
 			Form_PrintUnderwrite = ""
-			If Form_Password1 = "" and Form_Password2 = "" and ApplyFlag = 0 Then
+			If Form_Password1 = "" and Form_Password2 = "" and ApplyFlag = 0 and Old_Form_Answer <> "" Then
 				Form_Password1 = ""
 				Form_Password2 = ""
 			Else

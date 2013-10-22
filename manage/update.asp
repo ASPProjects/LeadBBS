@@ -1,12 +1,16 @@
 <!-- #include file=../inc/BBSsetup.asp -->
 <!-- #include file=../inc/MD5.asp -->
 <%
-
-
 Server.ScriptTimeOut = 999999
 Response.Buffer = False
 DEF_BBS_HomeUrl = "../"
 Dim Con,GBL_CHK_TempStr
+
+Const NetFlag = 1
+Const NetUrl = "http://update.u1.leadbbs.com/"
+Const NativeDir = "Download/"
+Const SplitString = "---NdetVeL---"
+Const CheckEndString = "LeadBBS_^93857855287569"
 
 UpdateDatabase
 
@@ -92,6 +96,13 @@ Sub restartbbs
 
 End Sub
 
+sub pageend
+
+	restartbbs
+	response.end
+
+end sub
+
 Sub UpdateDatabase
 
 	If CheckSupervisorUserName = 0 Then
@@ -115,7 +126,7 @@ input{font-size:9pt;}
 input:focus, input:hover { background-color: #f1f1f1; }
 select{font-size:9pt;height:20px;color:black;background-color:#f5fafe}
 table{text-align: left;}
-.fminpt{padding:0px 4px 0px 4px;border-right:#B8D5EA 1px solid;border-top:#B8D5EA 1px solid;font-size:9pt;border-left:#B8D5EA 1px solid;border-bottom:#B8D5EA 1px solid;height:17px;line-height:17px;vertical-align: middle;}
+.fminpt{padding:0px 4px 0px 4px;border-right:#B8D5EA 1px solid;border-top:#B8D5EA 1px solid;font-size:9pt;border-left:#B8D5EA 1px solid;border-bottom:#B8D5EA 1px solid;height:22px;line-height:22px;vertical-align: middle;}
 .input_1{width:40px;}
 .input_2{width:100px;}
 .input_3{width:150px;}
@@ -147,6 +158,7 @@ a:hover{text-decoration:none;color:#0055aa;}
 .frameline{line-height:26px;margin:2px 0px 2px 18px;padding:0px;}
 .note {color:gray;font-size:8pt;}
 .frame_body{margin: 15px;}
+.errwindows{width:95%;overflow:scroll;}
 </style>
 	</head>
 	<body>
@@ -157,7 +169,7 @@ a:hover{text-decoration:none;color:#0055aa;}
 		<div class="frameline">2. 配置扩展参数：更多论坛的参数设置选项可以在此找到。</div>
 		<div class="frameline">3. 检测是否有版本更新：将您的论坛与官方连接比较，检测是否有新的更新。</div>
 		<div class="frameline">4. 立即更新补丁：将您的论坛与官方连接比较，并升级到最新版本。</div>
-		<div style="width:90%;margin-bottom:216px;BORDER: #EEE0CB 5px solid; BACKGROUND: #F9F5F0; text-align:left;width:500px;padding:22px;line-height:2.0">
+		<div style="width:90%;margin-bottom:216px;BORDER: #EEE0CB 5px solid; BACKGROUND: #F9F5F0; text-align:left;padding:22px;line-height:2.0">
 
 		
 	<%
@@ -403,6 +415,13 @@ Sub Update62_initBBSdata
 	CALL Update_GetFileParaValue("app/qqlogin/oauth.asp","Const callback = ",CurN,"CALL BACK,回调地址，注意只需要填写域名，不包括http及目录。")
 	
 	CALL Update_GetFileParaValue("帖内分享代码设置$$$$:$a/a.asp$$$$:$textarea","Const LMTDEF_ShareID = ",CurN,"可以填写各站或自行编写类型的分享代码(HTML格式，注意手工删除换行符),保持为空则关闭分享代码;")
+	
+	CALL Update_GetFileParaValue("Jmail邮件发送SMTP信息设置$$$$:$User/inc/Mail_fun.asp","const DEF_MAIL_smtpUser = ",CurN,"当邮件服务器使用SMTP发信验证时设置的登录帐户。")
+	CALL Update_GetFileParaValue("User/inc/Mail_fun.asp","const DEF_MAIL_smtpPass = ",CurN,"使用SMTP发信验证时设置的登录密码。")
+	CALL Update_GetFileParaValue("User/inc/Mail_fun.asp","const DEF_MAIL_smtpHost = ",CurN,"邮件服务器地址(IP或域名)")
+	CALL Update_GetFileParaValue("User/inc/Mail_fun.asp","const DEF_MAIL_FromName = ",CurN,"发件人的名称，可以填写您网站的名称")
+	
+	CALL Update_GetFileParaValue("附件:限制未登录用户获取$$$$:$a/file.asp","Const DEF_GuestEnable",CurN,"是否允许游客查看附件：0,禁止，1.允许")
 	GBL_ParaCount = CurN - 1
 
 	'保证或更新配置
@@ -463,7 +482,7 @@ Sub Update62_initBBSdata
 	'检测并保存User/inc/Contact_info.asp User_Reg.asp
 	CALL Update_ECHO("<div class=alertdone>检测并保存配置文件。。。</div>",1)
 	Dim FileSetupData
-	FileSetupData = Array("inc/BBSSetup.asp", "inc/Ubbcode_Setup.asp","inc/User_Setup.ASP","inc/Upload_Setup.asp","inc/AD_Data.asp","User/inc/Contact_info.asp","User/inc/User_Reg.asp")
+	FileSetupData = Array("inc/BBSSetup.asp", "inc/Ubbcode_Setup.asp","inc/User_Setup.ASP","inc/Upload_Setup.asp","inc/AD_Data.asp","User/inc/Contact_info.asp","User/inc/User_Reg.asp","article/inc/home_bannerlist.asp","article/inc/home_channellist.asp","article/inc/sitebottom_info.asp")
 	Dim FileContent
 	
 	For N = 0 to Ubound(FileSetupData,1)
@@ -1008,6 +1027,7 @@ Sub Update_SetupFilePara
 <form name="pollform3sdx" method="post" action="Update.asp">
 <input type="hidden" name="SubmitFlag" value=yes>
 <input type="hidden" name="sure" value=1>
+<input type=hidden name=startflag value="1">
 <br />
 <p>
 		<b>设置：<span class=grayfont>论坛扩展参数设置</span></b>
@@ -1159,12 +1179,6 @@ Sub Update_SetupFilePara_RefreshValue
 End Sub
 
 
-Const NetFlag = 1
-Const NetUrl = "http://update.u1.leadbbs.com/"
-Const NativeDir = "Download/"
-Const SplitString = "---NdetVeL---"
-Const CheckEndString = "LeadBBS_^93857855287569"
-
 Sub Update_CheckVersion
 	
 	Dim Update,CurFile,CurFile_Name,CurFile_Intro
@@ -1270,7 +1284,7 @@ Sub Update62_CopyFile
 					CloseDatabase
 					CALL Update_ECHO("<div class=alert>更新模块获得更新，更新强制终止，可点击右侧更新功能继续版本更新。</div>",0)
 					Update_PageBottom
-					Response.End
+					pageend
 				End If
 			End If
 		End If
@@ -1317,7 +1331,7 @@ Sub Update_ExeCuteCopyFIle(str)
 	If Request.ServerVariables("SERVER_PORT") <> "80" Then thisUrl = thisUrl & ":" & Request.ServerVariables("SERVER_PORT")
 	thisUrl = "http://" & thisUrl & Replace(Request.Servervariables("SCRIPT_NAME"),"Update.asp","")
 	
-	Dim Extend,LineDir_Bak,NoteInfo
+	Dim Extend,LineDir_Bak,NoteInfo,LineDir_truestr
 	For N = 0 to count
 		ListIndex(N) = Replace(Trim(ListIndex(N)),"	"," ")
 		Do while inStr(ListIndex(N),"  ")
@@ -1326,6 +1340,7 @@ Sub Update_ExeCuteCopyFIle(str)
 		If inStr(ListIndex(N)," ") Then
 			LineCommandArray = Split(ListIndex(N)," ")
 			LineCommand = LineCommandArray(0)
+			LineDir_truestr = LineCommandArray(1)
 			LineDir = LCase(Replace(LineCommandArray(1),"/","\"))
 			LineDir_Bak = LineDir
 			If Left(LineDir,7) = "manage\" and LCase(DEF_ManageDir) <> "manage" Then LineDir = DEF_ManageDir & Mid(LineDir,7)
@@ -1396,9 +1411,19 @@ Sub Update_ExeCuteCopyFIle(str)
 					Update_GetInternetFile(Replace(thisUrl,"update.asp","") & LineDir)
 					CALL DelFile(LineDir,0)
 					CALL Update_ECHO(NoteInfo,0)
+				case "ver":
+					CALL LDExeCute("Update LeadBBS_SiteInfo Set Version='" & replace(replace(LineDir_truestr,"~"," "),"'","''") & "'",1)
+					response.write "LineDir_truestr:" & LineDir_truestr
+					ReloadVesion
 				case "sql":
-					dim sqlfile
+					dim sqlfile,splitsql,sqln
 					sqlfile = BytesToBstr(Update_GetInternetFile(NetUrl & LineDir_Bak))
+					If inStr(sqlfile,"-@-@-split-@-@-") = 0 Then
+						CALL Update_ECHO(NoteInfo,0)
+						CALL Update_ECHO("<div class=alert>无法获取更新文件，以下为错误信息：.</div><div class=errwindows>" & sqlfile & "</div>",0)
+						closedatabase
+						pageend
+					end if
 					sqlfile = split(sqlfile,"-@-@-split-@-@-")
 					if Ubound(sqlfile)>=1 Then
 						select case DEF_UsedDataBase
@@ -1409,13 +1434,43 @@ Sub Update_ExeCuteCopyFIle(str)
 									if trim(sqlfile(2)) <> "" then call ldexecute(sqlfile(2),1)
 								end if
 							case else
-								if trim(sqlfile(1)) <> "" then call ldexecute(sqlfile(1),1)
+								if trim(sqlfile(1)) <> "" then 
+									splitsql = split(sqlfile(1),VbCrLf)
+									for sqln = 0 to ubound(splitsql,1)
+										call ldexecute(splitsql(sqln),1)
+									next
+								end if
 						end select
 					end if
 					CALL Update_ECHO(NoteInfo,0)
 			End Select
 		End If
 	Next
+
+End Sub
+
+Sub ReloadVesion
+
+	dim Rs,SQL
+	SQL = sql_select("select Version from LeadBBS_SiteInfo",1)
+	Set Rs = LDExeCute(SQL,0)
+	If Not Rs.Eof Then
+		SQL = Rs(0)
+		Rs.Close
+		Set Rs = Nothing
+	Else
+		SQL = ""
+		Rs.Close
+		Set Rs = Nothing
+	End If
+	Application.Lock
+	response.write "sql:" & sql
+	If inStr(SQL & "","LeadBBS") Then
+		Application(DEF_MasterCookies & "Version") = SQL
+	Else
+		Application(DEF_MasterCookies & "Version") = "LeadBBS"
+	End If
+	Application.UnLock
 
 End Sub
 
@@ -1560,15 +1615,24 @@ Function Update_GetInternetFile(ur)
 		Response.Write "<p>错误描述: <font color=red>" & err.description & "</font></p>"
 		Err.clear
 		Update_GetInternetFile = "err"
+		closedatabase
+		pageend
 		Exit Function
 	End If
 
-	If xmlHttp.readystate = 4 then 
-	'if xmlHttp.status=200 Then
-		Update_GetInternetFile = xmlhttp.Responsebody
-	'end if 
+	If xmlHttp.readystate = 4 then
+		if xmlHttp.status=200 Then
+			Update_GetInternetFile = xmlhttp.Responsebody
+		else
+			CALL Update_ECHO("<div class=alert>无法获取相关文件" & server.htmlencode(ur) & "，错误信息:" & xmlHttp.status & "，更新中止.</div>",0)
+			closedatabase
+			pageend
+		end if 
 	Else 
 		Update_GetInternetFile = "err"
+		CALL Update_ECHO("<div class=alert>无法获取以下文件，更新中止：" & htmlencode(ur) & ".</div>",0)
+		closedatabase
+		pageend
 	End If
 	Set xmlHttp = Nothing
 

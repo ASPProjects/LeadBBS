@@ -8,10 +8,6 @@ Dim GBL_ID
 initDatabase
 GBL_CHK_TempStr = ""
 checkSupervisorPass
-If Replace(LCase(DEF_Version) & ""," ","") <> "leadbbs7.0" Then
-	CALL LDExeCute("Update LeadBBS_SiteInfo Set Version='" & chr(76)&chr(101)&chr(97)&chr(100)&chr(66)&chr(66)&chr(83)&chr(32)&chr(55)&chr(46)&chr(48) & "'",1)
-	ReloadVesion
-End If
 GBL_ID = GBL_UserID
 
 Dim GBL_InPageFlag
@@ -68,9 +64,9 @@ Sub LoginAccuessFul
 		nav_sel($id('nav_itemlist' + n + '_default'));
 		$id('mainFrame').src = $id('nav_itemlist' + n + '_default').href;
 	}
-	document.body.onselectstart = document.body.ondrag = function(){
-    return false;
-	}
+	//document.body.onselectstart = document.body.ondrag = function(){
+    //return false;
+	//}
 </script>
 
 
@@ -85,6 +81,7 @@ Sub LoginAccuessFul
 				<a href="javascript:;" id="nav_assort_6" class="item" target="mainFrame" onclick="nav_assortsel(6);">风格</a>
 				<a href="javascript:;" id="nav_assort_7" class="item" target="mainFrame" onclick="nav_assortsel(7);">广告</a>
 				<a href="javascript:;" id="nav_assort_8" class="item" target="mainFrame" onclick="nav_assortsel(8);">功能</a>
+				<a href="javascript:;" id="nav_assort_9" class="item" target="mainFrame" onclick="nav_assortsel(9);">CMS</a>
 			</div>
 			
 		    <div class=top_userinfo>
@@ -105,12 +102,12 @@ Sub LoginAccuessFul
 			</div>
 	</div>
 	
-	
-	<div class="frame_leftbody" style="height: 100%; overflow: auto;">
+	<div class="frame_leftbody" style="">
 		<br />
 		<div class="frame_leftcontent">
 		<%Default_NavItem%>
 		</div>
+	</div>
 	<div class="maincontent">
 		<iframe src="Default.asp?action=info" name="mainFrame" id="mainFrame" hidefocus="" frameborder="no" scrolling="auto">
 		</iframe>
@@ -178,7 +175,7 @@ Function DisplaySystemInfo
 	CheckObjInstalled("Scripting.Dictionary")
 	Response.write GBL_CHK_TempStr%>
 	ADODB.Stream <%
-	CheckObjInstalled("ADODB.Stream")
+	CheckObjInstalled("Scripting.Dictionary")
 	Response.write GBL_CHK_TempStr%> (全部支持才能正常上传)</div>
 	<%End If%>
 	<div class=frametitle>LeadBBS更新检测</div>
@@ -214,6 +211,8 @@ End Function
 
 Sub Update_CheckVersion
 
+	
+	
 	If Update_CheckSetupRIDExist(1002," and ClassNum=0") = 0 Then
 		GBL_UpdateVersion = "20100101001"
 	Else
@@ -428,6 +427,7 @@ Sub Default_NavItem
 	</div>
 	<div class="nav_itemlist" id="nav_itemlist7" style="display:none;">
 		<div class="item"><a href=<%=NewUrl%>SiteManage/SiteLink.asp?SiteLink_Flag=10 target="mainFrame" onclick="nav_sel(this);" id="nav_itemlist7_default"><span>帖间广告管理</span></a></div>
+		<div class="item"><a href=<%=NewUrl%>SiteManage/SiteInfo.asp?action=admanage target="mainFrame" onclick="nav_sel(this);"><span>综合广告栏位管理</span></a></div>
 	</div>
 	
 	<div class="nav_itemlist" id="nav_itemlist8" style="display:none;">
@@ -462,6 +462,24 @@ Sub Default_NavItem
 		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>User/MyInfoBox.asp?AllPrinting=Yesing target="_blank" onclick="nav_sel(this);"><span>短消息管理</span></a></div>
 		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>User/LookUserInfo.asp?Evol=bag target="_blank" onclick="nav_sel(this);"><span>收藏帖子管理</span></a></div>
 		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>User/SendMessage.asp?pub=1 target="_blank" onclick="nav_sel(this);"><span>发布公告</span></a></div>
+	</div>
+	
+	
+	
+	<div class="nav_itemlist" id="nav_itemlist9" style="display:none;">
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=newsclass&list=1 target="mainFrame" onclick="nav_sel(this);" id="nav_itemlist9_default"><span>分类管理</span></a></div>
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=newsclass target="mainFrame" onclick="nav_sel(this);"><span>分类添加</span></a></div>
+		<div class="item"><a href=javascript:;><div class=nav_sepline></div></a></div>
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=newsarticle target="mainFrame" onclick="nav_sel(this);"><span>文章添加</span></a></div>
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=newsmanage target="mainFrame" onclick="nav_sel(this);"><span>文章管理</span></a></div>
+		<div class="item"><a href=javascript:;><div class=nav_sepline></div></a></div>
+		
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=setchannel target="mainFrame" onclick="nav_sel(this);"><span>设置首页栏目内容</span></a></div>
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=editfile&form_fileid=0 target="mainFrame" onclick="nav_sel(this);"><span>编辑首页图片新闻</span></a></div>
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=editfile&form_fileid=1 target="mainFrame" onclick="nav_sel(this);"><span>自定义网站底部信息</span></a></div>
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=editfile&form_fileid=2 target="mainFrame" onclick="nav_sel(this);"><span>CSS样式表</span></a></div>
+		<div class="item"><a href=javascript:;><div class=nav_sepline></div></a></div>
+		<div class="item"><a href=<%=DEF_BBS_HomeUrl%>article/center.asp?action=updatecache target="mainFrame" onclick="nav_sel(this);"><span>立即更新系统缓存</span></a></div>
 	</div>
 	<script>
 	var nav_curassort = 1;

@@ -99,7 +99,7 @@ Function DisplayDatabaseLink
           		</tr></table>
           		&nbsp; (<span class=grayfont>指定默认的发帖模式，高级模式允许在线编辑网页</span>)</td>
 		</tr>
-		<tr bgcolor=<%=DEF_BBS_LightestColor%>>
+		<tr>
 			<td class=tdbox width=50>表情分类</td>
 			<td class=tdbox>
 			<textarea cols=80 name=Form_DEF_UbbIconG style="width: 100%;height:110px; word-break: break-all;" class=fmtxtra><%If Form_DEF_UbbIconG <> "" Then Response.Write VbCrLf & Server.htmlEncode(Form_DEF_UbbIconG)%></textarea>
@@ -107,7 +107,7 @@ Function DisplayDatabaseLink
 			使用单角单空格分隔，例如 经典表情 1 25 代表经典表情分类对应编号1-25,多分类用换行区分
 			最多50个分类 最大数字<%=DEF_UBBiconNumber%></td>
 		</tr>
-		<tr bgcolor=<%=DEF_BBS_LightestColor%>>
+		<tr>
 			<td class=tdbox width=50>内容链接</td>
 			<td class=tdbox>
 			<textarea cols=180 name=Form_DEF_UbbLinkData style="width: 100%;height:220px; word-break: break-all;" class=fmtxtra><%If Form_DEF_UbbLinkData <> "" Then Response.Write VbCrLf & Server.htmlEncode(Form_DEF_UbbLinkData)%></textarea>

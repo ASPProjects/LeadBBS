@@ -1,19 +1,27 @@
 <%
 'jmail.message方式发送
+const DEF_MAIL_smtpUser = "" '当邮件服务器使用SMTP发信验证时设置的登录帐户。
+const DEF_MAIL_smtpPass = "" '使用SMTP发信验证时设置的登录密码。
+const DEF_MAIL_smtpHost = "" '邮件服务器地址(IP或域名)
+const DEF_MAIL_FromName = "LeadBBS" '发件人的名称，可以填写您网站的名称
+
 Function SendJmail_Message(Email,Topic,MailBody)
 
 	Dim msg
 	set msg = Server.CreateOBject( "JMail.Message" )
 	msg.Logging = true
-	msg.silent = true
-	msg.From = "sender@leadbbs.com"
-	msg.FromName = "LeadBBS.COM"
+	msg.silent = false
+	msg.From = DEF_MAIL_smtpUser
+	msg.FromName = DEF_MAIL_FromName
 	msg.AddRecipient Email
 	msg.Subject = Topic
 	msg.Charset="gb2312"
 	msg.ContentType = "text/html"
 	msg.Body = MailBody
-	if not msg.Send( "1.1.1.4" ) then 'mail server
+	msg.Priority = 1
+	msg.MailServerUserName = DEF_MAIL_smtpUser
+	msg.MailServerPassword = DEF_MAIL_smtpPass
+	if not msg.Send( DEF_MAIL_smtpHost ) then 'mail server
 		Response.write "<pre>" & msg.log & "</pre>"
 		SendJmail_Message = 0
 	else
@@ -27,11 +35,15 @@ End Function
 'jmail.smtpmail发送
 Function SendJmail(Email,Topic,MailBody)
 
+	If DEF_MAIL_smtpUser <> "" Then
+		SendJmail = SendJmail_Message(Email,Topic,MailBody)
+		exit function
+	end if
 	Dim JMail
 	'on error resume next
 	Set JMail = Server.CreateObject("JMail.SMTPMail")
 	JMail.LazySend = true
-	JMail.silent = true
+	JMail.silent = false
 	JMail.Charset = "gb2312"
 	JMail.ContentType = "text/html"
 	JMail.Sender = "mail377234@yourmail.com" '改为你的邮箱

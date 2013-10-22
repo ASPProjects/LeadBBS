@@ -55,16 +55,14 @@
 		{
 			if (! isnum(obj.Form_FaceWidth.value))
 			{
-				alert("自定义头像宽度必须是数字！\n");
-				obj.Form_FaceWidth.focus();
+				obj.Form_FaceWidth.value = 120;
 				return;
 			}
 			else
 			{
 				if(obj.Form_FaceWidth.value<20 || obj.Form_FaceWidth.value>user_DEF_AllFaceMaxWidth)
 				{
-					alert("自定义头像宽度必须在20-" + user_DEF_AllFaceMaxWidth + "之间！\n");
-					obj.Form_FaceWidth.focus();
+					obj.Form_FaceWidth.value = 120;
 					return;
 				}
 			}
@@ -74,16 +72,14 @@
 		{
 			if (! isnum(obj.Form_FaceHeight.value))
 			{
-				alert("自定义头像高度必须是数字！\n");
-				obj.Form_FaceHeight.focus();
+				obj.Form_FaceHeight.value = 120;
 				return;
 			}
 			else
 			{
 				if(obj.Form_FaceHeight.value<20 || obj.Form_FaceHeight.value>user_DEF_AllFaceMaxWidth*2)
 				{
-					alert("自定义头像高度必须在20-" + user_DEF_AllFaceMaxWidth*2 + "之间！\n");
-					obj.Form_FaceHeight.focus();
+					obj.Form_FaceHeight.value = 120;
 					return;
 				}
 			}
@@ -278,3 +274,14 @@ function init_uploadform()
 		upload[i].parentNode.parentNode.insertBefore(iobj, upload[i].parentNode);
 	}
 }
+
+
+	function reg_checkinfo(item,str)
+	{
+		if(str.replace(/(^\s*)|(\s*$)/g,"")==""||str=="")
+		{
+			$id("reg_check_" + item).innerHTML="<span class=redfont>此项必须填写。</span>"
+			return;
+		}
+		getAJAX(user_DEF_RegisterFile,"checkflag=1&checkitem=" + item + "&checkvalue=" + escape(str),"reg_check_" + item);
+	}

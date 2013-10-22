@@ -344,7 +344,7 @@ End If
 		Dim N
 	
 		Dim PageSplitString,PageSplitString2
-		PageSplitString = "<tr bgcolor=" & DEF_BBS_LightestColor & " height=25 class=TBBG9><td colspan=5><table width=100% border=0 cellspacing=0 cellpadding=0><tr><td><img src=../images/null.gif width=2 height=2><br><img src=../images/null.gif width=2 height=2>"
+		PageSplitString = "<tr height=25 class=TBBG9><td colspan=5><table width=100% border=0 cellspacing=0 cellpadding=0><tr><td><img src=../images/null.gif width=2 height=2><br><img src=../images/null.gif width=2 height=2>"
 		If FirstRootID >= GBL_Board_AllMaxRootID Then
 			PageSplitString = PageSplitString & "<font color=888888 class=grayfont face=webdings title=Ê×Ò³>9</font>"
 			PageSplitString = PageSplitString & "<font color=888888 class=grayfont face=webdings title=ÉÏÒ³>7</font>"

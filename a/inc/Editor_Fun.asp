@@ -1,9 +1,25 @@
 <!-- #include file=Editor.asp -->
 <%
 Const Edt_MiniMode = 1 '发帖界面：0-传统简约模式 1.多功能模式
-Dim UploadListData,UploadListNum,EditFlag
+Dim UploadListData,UploadListNum,EditFlag,UploadTable
 UploadListNum = 0
 EditFlag = 0
+UploadTable = "LeadBBS_Upload"
+Dim UploadOneDayMaxNum,Upd_SpendFlag
+UploadOneDayMaxNum = DEF_UploadOneDayMaxNum
+Upd_SpendFlag = 0
+Dim upload_NoteLength
+upload_NoteLength = 30
+
+Dim LMT_MaxTextLength
+If CheckSupervisorUserName = 0 Then
+	LMT_MaxTextLength = DEF_MaxTextLength
+Else
+	LMT_MaxTextLength = DEF_MaxTextLength * 4
+End If
+
+Dim LMT_DefaultEdit
+LMT_DefaultEdit = DEF_UbbDefaultEdit
 
 Sub ReloadTopicAssort(BoardID)
 
@@ -24,9 +40,9 @@ Sub ReloadTopicAssort(BoardID)
 
 End Sub
 
-Function DisplayLeadBBSEditor1
+Function DisplayLeadBBSEditor1(Form_HTMLFlag,Form_Content,refer,hidemoreinfo)
 
-	If Edt_MiniMode = 0 Then%>
+	If Edt_MiniMode = 0 and refer = 0 Then%>
 	<tr>
 		<td width="<%=DEF_BBS_LeftTDWidth%>" class=tdleft>插入UBB标签</td>
 		<td class=tdright>
@@ -50,14 +66,17 @@ Function DisplayLeadBBSEditor1
 			<%If DEF_EnableFlashUBB = 1 then%><img src="../images/ubb/media.gif" style="cursor: pointer" onclick="addcontent(0,'MP=320,309','/MP');" title=插入Media文件 width=20 height=20 align=middle border=0>
 			<img src="../images/ubb/real.gif" style="cursor: pointer" onclick="addcontent(0,'RM=320,260','/RM');" title=插入RealPlay文件 width=20 height=20 align=middle border=0><%End If%>
 		</td>
-	</tr><%End If%>
+	</tr><%End If
+	if refer = 0 Then%>
 	<tr>
 		<td valign="top" width="<%=DEF_BBS_LeftTDWidth%>" class=tdleft>
+	<%End If
+		If hidemoreinfo = 1 then%>
 					内容(最多<%=Fix(LMT_MaxTextLength/1024)%>K)
 						<br><br>
-						<%If ((GetBinarybit(GBL_CHK_UserLimit,16) = 1 and GBL_BoardMasterFlag >= 2) or CheckSupervisorUserName = 1) Then%>
+						<%If ((GetBinarybit(GBL_CHK_UserLimit,16) = 1 and GBL_BoardMasterFlag >= 2) or CheckSupervisorUserName = 1) or refer > 0 Then%>
 						
-						编码方式<br>
+						编码方式<%if refer = 0 Then%><br><%end if%>
 							<label>
 							<input class=fmchkbox type="radio" name="Form_HTMLFlag" value="0"<%If Form_HTMLFlag=0 Then Response.Write " checked"%>>文本</label>
 							<label>
@@ -71,13 +90,29 @@ Function DisplayLeadBBSEditor1
 							<%End If%>
 					<br>
 					<a href="../User/Help/Ubb.asp" target=_blank>内容支持插入ＵＢＢ标签，使用方法请参考帮助</a>
-					<p><a href=#icon onclick="alert('发表的内容为'+edt_getdoclen()+'文字，最长允许<%=DEF_MaxTextLength%>字');">查看内容字数</a>
-					<br><span class=layerico><a href=#icon onclick="edt_mode?copyClipboard('text',edt_txtobj.value,'成功复制','<%=DEF_BBS_HomeUrl%>',this):copyClipboard('text',edt_doc.body.innerHTML,'成功复制','<%=DEF_BBS_HomeUrl%>',this);">复制帖子内容</a></span>
-			<br>
+					<%if refer = 0 Then
+						response.write "<br>"
+					else
+						response.write " - "
+					end if%>
+					<a href=#icon onclick="alert('发表的内容为'+edt_getdoclen()+'文字，最长允许<%=DEF_MaxTextLength%>字');">查看内容字数</a>
+					<%if refer = 0 Then
+						response.write "<br>"
+					else
+						response.write " - "
+					end if%><span class=layerico><a href=#icon onclick="edt_mode?copyClipboard('text',edt_txtobj.value,'成功复制','<%=DEF_BBS_HomeUrl%>',this):copyClipboard('text',edt_doc.body.innerHTML,'成功复制','<%=DEF_BBS_HomeUrl%>',this);">复制内容</a></span>
+					<%if refer = 0 Then
+						response.write "<br>"
+					else
+						response.write "<br><br>"
+					end if
+			End If%>
+	<%if refer = 0 Then%>
 		</td>
 		<td valign=top class=tdright>
+	<%End If%>
 
-<script src="inc/leadedit.js?ver=20080729.22"></script>
+<script src="<%=DEF_BBS_HomeUrl%>a/inc/leadedit.js?ver=20080729.22"></script>
 <script type="text/javascript">edt_heigh = 220;</script>
 <%
 CALL Editor_View(Edt_MiniMode,Form_Content)%>
@@ -88,16 +123,18 @@ edt_setmode(0);edt_setmode(<%
 	Else
 		Response.Write "1"
 	End If%>);edt_initdone=1;
-window.onbeforeunload = function(){if(edt_getdoclen()>0&&submitflag==0)return("您的帖子未发表，确定取消吗？");}</script>
+if(typeof submitflag != 'undefined')window.onbeforeunload = function(){if(edt_getdoclen()>0&&submitflag==0)return("您的帖子未发表，确定取消吗？");}</script>
+<%if refer = 0 Then%>
 			</td>
 		</tr><%
+	End If
 	If DEF_UBBiconNumber > 0 Then%>
 <script type="text/javascript">
 
 </script>
 <%
 	End If
-	If LMT_EnableUpload = 1 Then DisplayUpload
+	If LMT_EnableUpload = 1 Then DisplayUpload(refer)
 
 End Function
 
@@ -107,7 +144,7 @@ Dim Temp
 Temp = LCase(Request.ServerVariables("server_name"))
 If inStr(Temp,".") <> inStrRev(Temp,".") Then Temp = Mid(Temp,inStr(Temp,".") + 1)
 %>
-<script src="inc/leadcode.js?ver=20080728.225"></script>
+<script src="<%=DEF_BBS_HomeUrl%>a/inc/leadcode.js?ver=20080728.225"></script>
 <script language=javascript>var GBL_domain="<%=Temp%>";HU="<%=DEF_BBS_HomeUrl%>";var DEF_DownKey="<%=UrlEncode(DEF_DownKey)%>";</script>
 <span ID=Preview Style='display:none'><%
 Global_TableHead%>
@@ -148,8 +185,9 @@ Global_TableHead%>
 
 End Sub
 
-Sub DisplayUpload
+Sub DisplayUpload(refer)
 
+if refer = 0 Then
 %>
 <tr>
 <td width="<%=DEF_BBS_LeftTDWidth%>" valign=top class=tdleft>
@@ -167,10 +205,14 @@ Sub DisplayUpload
 				ElseIf DEF_UploadDeletePoints < 0 Then
 					Response.Write " <font color=green class=greenfont title=必须自己删除才有相应的变化>获得" & 0-DEF_UploadDeletePoints & "" & DEF_PointsName(0) & "</font>"
 				End If
-			End If%>
+			End If
+%>
 </td>
 <td class=tdright valign=top>
 <%
+Else
+	Response.Write "<br>"
+End If
 
 If EditFlag = 1 Then
 	DisplayUploadEdit
@@ -179,12 +221,12 @@ If DEF_UploadOnceNum-UploadListNum > 0 Then
 %>
 <div><b>上传新附件</b></div>
 <div id=upload_node style="display:none;margin-top:5px;">
-文件 <span><span><input name="file_number" type="file" onchange="upl_onchange(this.name)" id=file_number size="20" class="fminpt"></span></span> 注释 <input name="text_number" type="text" maxlength=30 size="20" class='fminpt input_2'>
+文件 <span><span><input name="file_number" type="file" onchange="upl_onchange(this.name)" id=file_number size="20" class="fminpt"></span></span> 注释 <input name="text_number" type="text" maxlength=<%=upload_NoteLength%> size="20" class='fminpt input_2 note'>
 </div>
 <div id=new_upload>
 <div id=upload0 style="margin-top:5px;">
 文件 <span><span><input name="file0" type="file" id=file0 size="20" class="fminpt uninit_upload" onchange=upl_onchange(0)></span></span>
-注释 <input name="text0" type="text" maxlength=30 size="20" class="fminpt input_2">
+注释 <input name="text0" type="text" maxlength=<%=upload_NoteLength%> size="20" class="fminpt input_2 note">
 <span id=upload_del0 style=display:none><a href=#none onclick="upl_remove(this.parentNode.parentNode);">删除</a>
 <a href=#none onclick="addcontent(1,'[upload=0]');">插入</a></span>
 </div>
@@ -192,12 +234,12 @@ If DEF_UploadOnceNum-UploadListNum > 0 Then
 %><br>
 <div id=upload_doc> </div>
 <p>注：附件大小限制为 <%=int(DEF_FileMaxBytes/1024)%>K<%
-If DEF_UploadOneDayMaxNum > 0 Then Response.Write " 每天最多上传" & DEF_UploadOneDayMaxNum & "个"
+If UploadOneDayMaxNum > 0 Then Response.Write " 每天最多上传" & UploadOneDayMaxNum & "个"
 %>
 <script type="text/javascript">
 init_uploadform();
 var DEF_UploadFileType="<%=DEF_UploadFileType%>";
-var DEF_UploadOnceNum = <%=DEF_UploadOnceNum-UploadListNum%>,DEF_UploadOneDayMaxNum=<%=DEF_UploadOneDayMaxNum%>;
+var DEF_UploadOnceNum = <%=DEF_UploadOnceNum-UploadListNum%>,DEF_UploadOneDayMaxNum=<%=UploadOneDayMaxNum%>;
 if(DEF_UploadOneDayMaxNum<DEF_UploadOnceNum && DEF_UploadOneDayMaxNum > 0)DEF_UploadOnceNum = DEF_UploadOneDayMaxNum;
 
 var Upl_IOfun,Upl_Level=0,Upl_GetDelay=2000,Upl_Start = false,Upl_selnum = 0;
@@ -376,9 +418,11 @@ function Upl_submit(){
 	Upl_IOfun = window.setTimeout(Upl_IO,100);
 }
 </script>
+<%if refer = 0 Then%>
 </td>
 </tr>
 <%
+end if
 
 End Sub
 
@@ -391,7 +435,7 @@ Sub DisplayUploadEdit
 		Response.Write "<div style=""margin-top:5px;"">"
 		Response.WRite "保留<input class=fmchkbox type=checkbox name=filedel" & UploadListData(0,N) & " value=1 checked>"
 		Response.Write "<a href=#no onclick=""$id('fileedit_" & UploadListData(0,N) & "').style.display='';this.style.display='none';"">修改</a> <span id=fileedit_" & UploadListData(0,N) & " style=display:none><span><input name=fileedit" & UploadListData(0,N) & " type=file id=fileedit" & UploadListData(0,N) & " size=15 class=""fminpt uninit_upload""></span></span>"
-		Response.Write " 注释 <input name=textedit" & UploadListData(0,N) & " type=text value=""" & htmlencode(UploadListData(8,N)) & """ maxlength=30 size=20 class='fminpt input_2'> " & htmlencode(UploadListData(6,N)) & "</div>"
+		Response.Write " 注释 <input name=textedit" & UploadListData(0,N) & " type=text value=""" & htmlencode(UploadListData(8,N)) & """ maxlength=" & upload_NoteLength & " size=20 class='fminpt input_2 note'> " & htmlencode(UploadListData(6,N)) & "</div>"
 	Next
 	Response.Write "<br>"
 
@@ -400,7 +444,7 @@ End Sub
 Sub GetAncUploaInfo
 
 	Dim Rs
-	Set Rs = LDExeCute("Select ID,UserID,PhotoDir,SPhotoDir,ndatetime,FileType,FileName,FileSize,Info,AnnounceID,BoardID from LeadBBS_Upload where AnnounceID=" & Form_EditAnnounceID,0)
+	Set Rs = LDExeCute("Select ID,UserID,PhotoDir,SPhotoDir,ndatetime,FileType,FileName,FileSize,Info,AnnounceID,BoardID from " & UploadTable & " where AnnounceID=" & Form_EditAnnounceID,0)
 	If Not Rs.Eof Then
 		UploadListData = Rs.GetRows(-1)
 		UploadListNum = Ubound(UploadListData,2) + 1
@@ -455,10 +499,10 @@ Private Sub Class_Initialize
 		Exit Sub
 	End If
 
-	If DEF_UploadOneDayMaxNum > 0 and CheckSupervisorUserName = 0 Then
+	If UploadOneDayMaxNum > 0 and CheckSupervisorUserName = 0 Then
 		Dim Rs,Num
 		Num = 0
-		Set Rs = LDExeCute(sql_select("Select NdateTime from LeadBBS_Upload where UserID=" & GBL_UserID & " order by id DESC",DEF_UploadOneDayMaxNum),0)
+		Set Rs = LDExeCute(sql_select("Select NdateTime from " & UploadTable & " where UserID=" & GBL_UserID & " order by id DESC",UploadOneDayMaxNum),0)
 		If Not Rs.Eof Then
 			Do While Not Rs.Eof
 				Num = RestoreTime(Rs(0))
@@ -469,8 +513,8 @@ Private Sub Class_Initialize
 				End If
 				Rs.MoveNext
 			Loop
-			If TodayNum > DEF_UploadOneDayMaxNum Then
-				Upd_ErrInfo = Upd_ErrInfo & "无法再上传附件，每天最多可传" & DEF_UploadOneDayMaxNum & "个附件!"
+			If TodayNum > UploadOneDayMaxNum Then
+				Upd_ErrInfo = Upd_ErrInfo & "无法再上传附件，每天最多可传" & UploadOneDayMaxNum & "个附件!"
 				EnableUpload = 0
 			End If
 		End If
@@ -625,8 +669,15 @@ Public Sub Upload_File
 	Dim FileType,File,FileName,N,FileSize,Tmp,Info
 	Dim TmpPoints
 	TmpPoints = GBL_CHK_Points
-
 	initUploadArr
+
+	dim infoLen
+	If lcase(UploadTable) = "leadbbs_upload" then
+		infoLen = 30
+	else
+		upload_NoteLength = 255
+		infoLen = 255
+	end if
 
 	For N = 0 to UploadProcessNum
 		If SQLArr(7,N) = 1 Then
@@ -648,9 +699,9 @@ Public Sub Upload_File
 
 		'编辑删除或空文件不作重新保存
 		If SQLArr(7,N) = 1 Then
-			Info = LeftTrue(Form_UpClass.form("textedit" & SQLArr(8,N)),30)
+			Info = LeftTrue(Form_UpClass.form("textedit" & SQLArr(8,N)),infoLen)
 		Else
-			Info = LeftTrue(Form_UpClass.form("text" & SQLArr(8,N)),30)
+			Info = LeftTrue(Form_UpClass.form("text" & SQLArr(8,N)),infoLen)
 		End If
 		If FileName <> "" Then
 			FileType = LCase(file.FileType)
@@ -704,7 +755,7 @@ Public Sub Upload_File
 			Else
 				If Upd_SpendFlag = 1 and DEF_UploadSpendPoints > 0 and DEF_UploadSpendPoints > TmpPoints Then
 					Upd_ErrInfo = Upd_ErrInfo & "<br>附件 " & HtmlEncode(Upd_SaveName) & " 上传失败(" & DEF_PointsName(0) & "不足)!"
-				ElseIf DEF_UploadOneDayMaxNum > 0 and TodayNum >= DEF_UploadOneDayMaxNum Then
+				ElseIf UploadOneDayMaxNum > 0 and TodayNum >= UploadOneDayMaxNum Then
 					Upd_ErrInfo = Upd_ErrInfo & "<br>附件 " & HtmlEncode(Upd_SaveName) & " 上传失败(超过日上传附件数量)!"
 				Else
 					TmpPoints = TmpPoints - DEF_UploadSpendPoints
@@ -767,13 +818,13 @@ End Sub
 
 Public Sub UpdateUpload(id)
 
-	CALL LDExeCute("Update LeadBBS_Upload Set AnnounceID=" & id & " where id in(" & UploadList & ")",1)
+	CALL LDExeCute("Update " & UploadTable & " Set AnnounceID=" & id & " where id in(" & UploadList & ")",1)
 
 End Sub
 
 Private Sub DeleteUpload(id)
 
-	CALL LDExeCute("Delete from LeadBBS_Upload where id in(" & id & ")",1)
+	CALL LDExeCute("Delete from " & UploadTable & " where id in(" & id & ")",1)
 
 End Sub
 
@@ -786,7 +837,7 @@ Private Sub Saved
 	Dim DelContentStr
 	Dim EditN
 	EditN = 0
-	
+
 	Dim TmpHome
 	TmpHome = Left(DEF_BBS_UploadPhotoUrl,1)
 	If TmpHome = "/" or TmpHome = "\" Then
@@ -798,7 +849,11 @@ Private Sub Saved
 	If EditFlag = 1 Then
 		AncID = Form_EditAnnounceID
 	Else
-		AncID = 0
+		If Form_EditAnnounceID > 0 Then
+			AncID = Form_EditAnnounceID
+		Else
+			AncID = 0
+		End If
 	End If
 
 	Dim DelNum,re
@@ -816,7 +871,7 @@ Private Sub Saved
 				If Upload_ViewType <> 1 Then
 					set re = New RegExp
 					re.Global = True
-					re.IgnoreCase = True						
+					re.IgnoreCase = True		
 					re.Pattern="\[IMG*([0-9=]*),(absmiddle|left|right|top|middle|bottom|absbottom|baseline|texttop)\](/|../|http://|https://|ftp://)(" & Replace(DEF_BBS_UploadPhotoUrl & UploadListData(2,EditN),"\","\\") & ")\[\/IMG]"
 					Form_Content = re.Replace(Form_Content,"")
 					Set re = Nothing
@@ -824,7 +879,7 @@ Private Sub Saved
 				UploadListData(0,EditN) = 0
 			Else '修改附件信息
 				If SQLArr(4,N) <> "" Then
-					SQL = "Update LeadBBS_Upload Set " &_
+					SQL = "Update " & UploadTable & " Set " &_
 						"PhotoDir='" & Replace(SQLArr(1,N),"'","''") & "'" &_
 						",SPhotoDir='" & Replace(SQLArr(2,N),"'","''") & "'" &_
 						",ndatetime=" & GetTimeValue(DEF_Now) &_
@@ -838,8 +893,7 @@ Private Sub Saved
 					If UploadListData(3,EditN) <> "" Then DeleteFiles(Server.MapPath(Replace(PhotoDirectory & UploadListData(3,EditN),"/","\")))
 					DelContentStr = "[upload=" & UploadListData(0,EditN) & "," & UploadListData(5,EditN) & "]" & UploadListData(6,EditN) & "[/upload]"
 					Form_Content = Replace(Form_Content,DelContentStr,"[upload=" & UploadListData(0,EditN) & "," & SQLArr(3,N) & "]" & SQLArr(4,N) & "[/upload]")
-					
-					
+
 					If Upload_ViewType <> 1 and (SQLArr(3,N) = 0 or  UploadListData(5,EditN) = 0) Then
 						Dim Tmp
 						If SQLArr(3,N) = 0 Then
@@ -860,14 +914,14 @@ Private Sub Saved
 							re.IgnoreCase = True
 							re.Pattern="\[IMG*([0-9=]*),(absmiddle|left|right|top|middle|bottom|absbottom|baseline|texttop)\](/|../|http://|https://|ftp://)(" & Replace(DEF_BBS_UploadPhotoUrl & UploadListData(2,EditN),"\","\\") & ")\[\/IMG]"
 							DelContentStr = "[upload=" & UploadListData(0,EditN) & "," & SQLArr(3,N) & "]" & SQLArr(4,N) & "[/upload]"
-						
+
 							Form_Content = re.Replace(Form_Content,DelContentStr)
 							Set re = Nothing
 						End If
 					End If
 					UploadListData(5,EditN) = SQLArr(3,N)
 				ElseIf SQLArr(6,N) <> "" Then
-					SQL = "Update LeadBBS_Upload Set " &_
+					SQL = "Update " & UploadTable & " Set " &_
 					"Info='" & Replace(SQLArr(6,N),"'","''") & "'" &_
 				 	" where ID=" & UploadListData(0,EditN)
 				 	CALL LDExeCute(SQL,1)
@@ -878,7 +932,7 @@ Private Sub Saved
 			If SQLArr(4,N) <> "" Then
 				Num = Num + 1
 				UserID = SQLArr(0,N)
-				SQL = "insert into LeadBBS_Upload(UserID,PhotoDir,SPhotoDir,ndatetime,FileType,FileName,FileSize,Info,AnnounceID,BoardID) Values(" &_
+				SQL = "insert into " & UploadTable & "(UserID,PhotoDir,SPhotoDir,ndatetime,FileType,FileName,FileSize,Info,AnnounceID,BoardID) Values(" &_
 					SQLArr(0,N) & ",'" & Replace(SQLArr(1,N),"'","''") & "','" & Replace(SQLArr(2,N),"'","''") & "'," &_
 				 	GetTimeValue(DEF_Now) & "," & SQLArr(3,N) &_
 				 	",'" & Replace(SQLArr(4,N),"'","''") & "'" &_
@@ -887,7 +941,7 @@ Private Sub Saved
 				 	")"
 				CALL LDExeCute(SQL,1)
 				
-				SQL = sql_select("Select ID From LeadBBS_Upload where UserID=" & SQLArr(0,N) & " order by ID DESC",1)
+				SQL = sql_select("Select ID From " & UploadTable & " where UserID=" & SQLArr(0,N) & " order by ID DESC",1)
 				Set Rs = LDExeCute(SQL,0)
 				If Not Rs.Eof Then
 					If UploadList = "0" Then UploadList = ""
@@ -924,6 +978,7 @@ End Sub
 
 Private Sub ChangeUploadNum(UserID,Num,Flag)
 
+	If lcase(UploadTable) <> "leadbbs_upload" then exit sub
 	Dim Temp,SQL
 	If Flag = 1 Then 'add
 		Temp = DEF_UploadSpendPoints

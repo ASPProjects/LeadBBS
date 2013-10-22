@@ -10,15 +10,15 @@
 <!-- #include file=../inc/Upload_Fun.asp -->
 <!-- #include file=inc/upload1_fun.asp -->
 <!-- #include file=../User/inc/Fun_SendMessage.asp -->
+<!-- #include file=../User/inc/Bind_Fun.asp -->
 <%
 Const LMT_EnableOtherGuestName = 0 '开放论坛是否允许使用"游客"以外的名字
 Const LMT_BuyAnnounceMaxPoints = 9 '购买帖消耗的最大积分
 
-Dim LMT_DefaultEdit,LMT_EnableUpload
-LMT_DefaultEdit = DEF_UbbDefaultEdit
+Dim LMT_EnableUpload
 Const LMTDEF_MaxReAnnounce = 1500 '允许的最大回复帖数，仅在允许树形下限制才会有效
 Const LMTDEF_MinAnnounceLength = 2 '发帖需要最少字数
-Const LMTDEF_NotReplyDate = 3600 '最后回复时间至今高于多少天的帖子则禁止回复,对版主及以上无效
+Const LMTDEF_NotReplyDate = 120 '最后回复时间至今高于多少天的帖子则禁止回复,对版主及以上无效
 Const LMTDEF_NeedCachetValue = 1 '设定多少威望用户可以自己归类专题
 Const LMTDEF_ColorSpend = 1 '设定帖子颜色消耗多少财富值
 Const LMTDEF_RepostMsg = 2 '回复帖子是否默认短消息通知帖主,0．默认不通知 1.回复全部通知 2.仅被引用时才通知
@@ -42,7 +42,9 @@ Form_NoUserUnderWriteFlag = 1
 Form_GoodAssort = 0
 
 Dim LMT_RootID,LMT_TopicName,LMT_ChildNum,LMT_RootIDBak,LMT_TopicTitleStyle,LMT_TopicNameNoHTML,LMT_LastInfo,LMT_TopicNameNoHTML_Temp,Topic_UserName,LMT_ReName
-Dim Upd_SpendFlag,Upd_ErrInfo
+Dim Upd_ErrInfo
+Dim Form_EditAnnounceID
+Form_EditAnnounceID = 0
 
 LMT_RootIDBak = 0
 
@@ -53,13 +55,6 @@ const PageSplitNum = 10
 Rem 新发表帖子的ＩＤ号
 Dim NewAnnounceID
 NewAnnounceID = 0
-
-Dim LMT_MaxTextLength
-If CheckSupervisorUserName = 0 Then
-	LMT_MaxTextLength = DEF_MaxTextLength
-Else
-	LMT_MaxTextLength = DEF_MaxTextLength * 4
-End If
 
 Function DisplayAnnounceForm
 
@@ -362,7 +357,7 @@ End If
 				<input name=Form_FaceIcon type=radio value=16<%If Form_FaceIcon=16 Then Response.WRite " CHECKED"%>><img src="../images/<%=GBL_DefineImage%>bf/FACE16.GIF" class=absmiddle>
 			</td>
 		</tr><%
-		DisplayLeadBBSEditor1
+		call DisplayLeadBBSEditor1(Form_HTMLFlag,Form_Content,0,1)
 		If Re_ID=0 and Form_VoteFlag = "" Then%>
 		<tr>
 			<td width="<%=DEF_BBS_LeftTDWidth%>" class=tdleft>加密本帖功能</td>
@@ -416,6 +411,13 @@ End If
 					%>>回复短消息通知</label><%
 				End If%>
 				- <a href="../User/Help/Ubb.asp?colo" target=_blank>颜色表</a>
+				<%
+				
+					Dim ConnetBind
+					set ConnetBind = New Connet_Bind
+					ConnetBind.BindAnnounceList
+					set ConnetBind = nothing
+				%>
 				<%If DEF_EnableAttestNumber > 2 and (DEF_AttestNumberPoints = 0 or GBL_CHK_Points < DEF_AttestNumberPoints) Then%>
 				<div style="line-height:400%">验证码
 				<%
@@ -1590,8 +1592,33 @@ Function SaveAnnounceValue
 			"[b]回复帖子：[/b][url=../a/a.asp?b=" & GBL_Board_ID & "&id=" & NewAnnounceID & "]" & htmlencode(Form_Title) & "[/url]",GBL_IPAddress
 		End If
 	End If
+	
+	Rem 下面发表同步
+	dim weiBoFlag
+	If GetFormData("bindpost_1_1") = "1" Then
+		weiBoFlag = 0
+	Else
+		weiBoFlag = 1
+	End If
+	If GetFormData("bindpost_1") = "1" or weiBoFlag = 0 Then
+		if weiBoFlag = 0 and GetFormData("bindpost_1") = "0" then weiBoFlag = 2
+		Dim ConnetBind
+		set ConnetBind = New Connet_Bind
+		call ConnetBind.PostShare(1,LeftTrue(Form_Title,72),getInstallDir("a/a2.asp") & "a/a.asp?b=" & GBL_Board_ID & "&id=" & NewAnnounceID,"",LeftTrue(clearUbbcode(GetReContent(Form_Content)),80),"",weiBoFlag)
+		set ConnetBind = nothing
+	End If
 
 End Function
+
+function getInstallDir(filedir)
+
+	dim HomeUrl
+	HomeUrl = Request.ServerVariables("server_name")
+	If Request.ServerVariables("SERVER_PORT") <> "80" Then HomeUrl = HomeUrl & ":" & Request.ServerVariables("SERVER_PORT")
+	HomeUrl = HomeUrl & replace(lcase(Request.Servervariables("SCRIPT_NAME")),lcase(filedir),"")
+	getInstallDir = "http://" & HomeUrl
+
+End function
 
 Function DisplayAnnounceAccessfull
 
@@ -1772,9 +1799,9 @@ Function GetTopicInfo
 					TmpContent = Mid(TmpContent,1,len(TmpContent)-2)
 				Loop
 				If Len(TmpContent)>100 Then
-					Form_Content = "[QUOTE][b]下面引用由[u]" & LMT_ReName & "[/u]发表的内容：[/b]" & VbCrLf & Left(TmpContent,100) & "...[/QUOTE]" & VbCrLf
+					Form_Content = "[QUOTE][b]下面引用由[@" & LMT_ReName & "][url=a.asp?b=" & GBL_Board_ID & "&id=" & Re_ID & "]发表的内容[/url]：[/b]" & VbCrLf & Left(TmpContent,100) & "...[/QUOTE]" & VbCrLf
 				Else
-					Form_Content = "[QUOTE][b]下面引用由[u]" & LMT_ReName & "[/u]发表的内容：[/b]" & VbCrLf & TmpContent & "[/QUOTE]" & VbCrLf
+					Form_Content = "[QUOTE][b]下面引用由[@" & LMT_ReName & "][url=a.asp?b=" & GBL_Board_ID & "&id=" & Re_ID & "]发表的内容[/url]：[/b]" & VbCrLf & TmpContent & "[/QUOTE]" & VbCrLf
 				End If
 				'If LMT_DefaultEdit = 0 Then Form_Content = UBB_Code(Form_Content)
 			End If
@@ -1846,9 +1873,9 @@ Function GetTopicInfo
 					Loop
 					If Form_Submitflag = "first" and Request.QueryString("repost") = "1" Then
 						If Len(TmpContent)>100 Then
-							Form_Content = "[QUOTE][b]下面引用由[u]" & LMT_ReName & "[/u]发表的内容：[/b]" & VbCrLf & VbCrLf & Left(TmpContent,100) & "...[/QUOTE]" & VbCrLf
+							Form_Content = "[QUOTE][b]下面引用由[@" & LMT_ReName & "][url=a.asp?b=" & GBL_Board_ID & "&id=" & Re_ID & "]发表的内容[/url]：[/b]" & VbCrLf & VbCrLf & Left(TmpContent,100) & "...[/QUOTE]" & VbCrLf
 						Else
-							Form_Content = "[QUOTE][b]下面引用由[u]" & LMT_ReName & "[/u]发表的内容：[/b]" & VbCrLf & VbCrLf & TmpContent & "[/QUOTE]" & VbCrLf
+							Form_Content = "[QUOTE][b]下面引用由[@" & LMT_ReName & "][url=a.asp?b=" & GBL_Board_ID & "&id=" & Re_ID & "]发表的内容[/url]：[/b]" & VbCrLf & VbCrLf & TmpContent & "[/QUOTE]" & VbCrLf
 						End If
 						'If LMT_DefaultEdit = 0 Then Form_Content = UBB_Code(Form_Content)
 					End If
@@ -2044,7 +2071,7 @@ REM *******Chat End*********
 	
 	'定义需要奖励的帖子ID编号,只限主题编号
 	Dim AncIDStr
-	AncIDStr = "2798569,2859838" '红包帖子主题ID列表，逗号分隔，回复此类帖子将奖励随机声望(1-3)，注意与[DelAnnounce.asp]配置保持一致
+	AncIDStr = "" '红包帖子主题ID列表，逗号分隔，回复此类帖子将奖励随机声望(1-3)，注意与[DelAnnounce.asp]配置保持一致
 
 	Dim Tn
 	If Re_ID > 0 and GBL_CHK_OnlineTime > 3600 and inStr("," & AncIDStr & ",","," & LMT_RootIDBak & ",") Then

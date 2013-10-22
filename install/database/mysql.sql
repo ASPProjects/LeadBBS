@@ -201,10 +201,7 @@ CREATE TABLE `leadbbs_boards` (
   KEY `IX_AsphouseBBS_Boards_BoardName` (`BoardName`) USING BTREE,
   KEY `IX_AsphouseBBS_Boards2` (`HiddenFlag`,`BoardAssort`,`OrderID`) USING BTREE,
   KEY `IX_LeadBBS_Boards_HiddenFlag` (`HiddenFlag`) USING BTREE,
-  KEY `IX_LeadBBS_Boards_ParentBoard` (`ParentBoard`) USING BTREE,
-  FULLTEXT KEY `BoardName` (`BoardName`),
-  FULLTEXT KEY `BoardName_2` (`BoardName`),
-  FULLTEXT KEY `BoardName_3` (`BoardName`)
+  KEY `IX_LeadBBS_Boards_ParentBoard` (`ParentBoard`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=gbk ROW_FORMAT=COMPACT;
 
 -- ----------------------------

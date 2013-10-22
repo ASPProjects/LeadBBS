@@ -538,9 +538,9 @@ Function ConvertTimeString(t)
 		Dim M1
 		M1 = M mod 60
 		If M1 = 0 Then
-			Tmp = Fix(M/60) & "小时前"
+			Tmp = Fix(M/60) & "时前"
 		Else
-			Tmp = Fix(M/60) & "小时" & M1 & "分前"
+			Tmp = Fix(M/60) & "时" & M1 & "分前"
 		End If
 	ElseIf M >= 1 Then
 		Tmp = M & "分前"
@@ -554,6 +554,45 @@ Function ConvertTimeString(t)
 
 End Function
 
+
+Function ConvertSimTimeString(t)
+
+	Dim Tmp,M
+	M = Datediff("n",t,DEF_Now)
+	If M > 2880 Then
+		If year(t) <> year(DEF_Now) then
+			Tmp = Mid(t,1,10)
+		Else
+			Tmp = Mid(t,6,11)
+		End if
+	ElseIf M > 720 Then
+		Select Case Datediff("d",t,DEF_Now)
+			Case 0: Tmp = "今天 " & Mid(t,12,5)
+			Case 1: Tmp = "昨天 " & Mid(t,12,5)
+			Case 2: Tmp = "前天 " & Mid(t,12,5)
+			Case Else: Tmp = t
+		End Select
+	ElseIf M >= 60 Then
+		Dim M1
+		M1 = M mod 60
+		If M1 = 0 Then
+			Tmp = Fix(M/60) & "时前"
+		Else
+			Tmp = Fix(M/60) & "时" & M1 & "分前"
+		End If
+	ElseIf M >= 1 Then
+		Tmp = M & "分前"
+	Else
+		M = Datediff("s",t,DEF_Now)
+		If M >= 0 Then Tmp = M & "秒前"
+	End If
+
+	If Tmp = "" Then Tmp = t		
+	ConvertSimTimeString = Tmp
+
+End Function
+
+
 Function toNum(s,default)
 
 	if isNumeric(s) = 0 Then
@@ -563,4 +602,10 @@ Function toNum(s,default)
 	end if
 
 End Function
+
+function filterUrlstr(str)
+
+	filterUrlstr = replace(replace(replace(str,"<","%3c"),"""","%22"),"'","%27")
+
+End function
 %>

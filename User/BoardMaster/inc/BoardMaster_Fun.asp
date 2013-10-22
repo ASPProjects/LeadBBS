@@ -100,7 +100,7 @@ Function DisplayLoginForm(title)
 		Else
 			Dim HomeUrl,u
 			HomeUrl = "http://"&Request.ServerVariables("server_name")
-			u = Request.QueryString("u")
+			u = filterUrlstr(Request.QueryString("u"))
 			If Left(u,1) <> "/" and Left(u,1) <> "\" and Left(u,Len(HomeUrl)) <> HomeUrl Then u = ""
 			If u = "" Then
 				u = Lcase(Request.ServerVariables("HTTP_REFERER"))

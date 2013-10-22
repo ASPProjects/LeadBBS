@@ -6,10 +6,10 @@
 <!-- #include file=inc/hubbleCom_fun.asp -->
 <%
 Server.ScriptTimeOut = 120
-Const Sch_AllContent = 98 '是否允许全部搜索,即同时搜索标题和内容，设为99表示采用hubbledotnet引擎ajax调用搜索，设为98采用组件方式调用hubbledotnet搜索
+Const Sch_AllContent = 0 '是否允许全部搜索,即同时搜索标题和内容，设为99表示采用hubbledotnet引擎ajax调用搜索，设为98采用组件方式调用hubbledotnet搜索
 Const Sch_AncTitle = 1 '是否允许帖子标题搜索
 Const Sch_AncContent = 1 '是否允许帖子内容搜索
-Const Sch_LimitTime = 10 '限制搜索时间(单位秒)
+Const Sch_LimitTime = 30 '限制搜索时间(单位秒)
 DEF_BBS_HomeUrl = "../"
 Dim LMT_WidthStr,GBL_NoneLimitFlag
 

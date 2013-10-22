@@ -72,7 +72,7 @@ Function DisplayAddFriend
 		Processor_Head
 		
 		Dim Url
-		Url = htmlencode(Left(Request("dir"),100))
+		Url = filterUrlstr(htmlencode(Left(Request("dir"),100)))
 		If Request("dir") = "" Then
 			Url = DEF_BBS_HomeUrl
 		End If

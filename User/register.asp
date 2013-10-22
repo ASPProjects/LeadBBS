@@ -9,8 +9,8 @@
 <!-- #include file=../inc/Constellation2.asp -->
 <!-- #include file=inc/Fun_SendMessage.asp -->
 <%
-Const LMT_RegVerifyQuestion = "apple这个单词共有几个字母？（请用西文数字回答）" '注册验证提示信息，可以是HTML格式，比如使用图片，若不填写表示不开启注册验证信息。
-Const LMT_RegVerifyAnswer = "5" '注册验证需要填写的答案。
+Const LMT_RegVerifyQuestion = "<img src=../images/temp/tmp.jpg>,注意必须全部使用大写字母" '注册验证提示信息，可以是HTML格式，比如使用图片，若不填写表示不开启注册验证信息。
+Const LMT_RegVerifyAnswer = "APPLE" '注册验证需要填写的答案。
 DEF_BBS_HomeUrl = "../"
 
 Form_FaceWidth = DEF_AllFaceMaxWidth
@@ -175,7 +175,7 @@ Function JoinForm%>
 			Else%>完善资料<%
 			End If%></div>
 	<br>
-	<%If DEF_UserNewRegAttestMode = 1 Then Response.Write "<span redfont>注意：新注册的用户需要至邮箱获取认证码激活，请仔<br>细填写您的有效邮箱地址！</span>"%>
+	<%If DEF_UserNewRegAttestMode = 1 Then Response.Write "<span class=redfont>注意：新注册的用户需要至邮箱获取认证码激活，请仔<br>细填写您的有效邮箱地址！</span>"%>
 
 			<table border=0  cellpadding="0" cellspacing="0" class="blanktable">
 			<tr>
@@ -562,7 +562,7 @@ Function displayAccessFull
 	End If
 	
 	Dim u
-	u = Request("u")
+	u = filterUrlstr(Request("u"))
 	If u = "" Then u = DEF_BBS_HomeUrl & "Boards.asp"
 	%><script type="text/javascript">
 		function a_topage()
@@ -591,10 +591,10 @@ Function Reg_GetRefer
 
 	Dim HomeUrl,u
 	HomeUrl = "http://"&Request.ServerVariables("server_name")
-	u = Request.QueryString("u")
+	u = filterUrlstr(Request.QueryString("u"))
 	If Left(u,1) <> "/" and Left(u,1) <> "\" and Left(u,Len(HomeUrl)) <> HomeUrl Then u = ""
 	If u = "" Then
-		u = Lcase(Request.ServerVariables("HTTP_REFERER"))
+		u = filterUrlstr(Lcase(Request.ServerVariables("HTTP_REFERER")))
 		If Request.ServerVariables("SERVER_PORT") <> "80" Then HomeUrl = HomeUrl & ":" & Request.ServerVariables("SERVER_PORT")
 		If Left(u,Len(HomeUrl)) <> Lcase(HomeUrl) Then u = ""
 		If inStr(u,"/user/" & DEF_RegisterFile) > 0 Then u = ""
@@ -633,7 +633,7 @@ end Sub
 Sub BindRegUser
 
 	If reg_action = "bind" and (reg_command = "reg" or reg_command = "bind") Then
-		CALL LDExeCute("insert into LeadBBS_AppLogin(UserID,appid,GuestName,appType,ndatetime,IPAddress) values(" & Form_ID & ",'" & Replace(Form_App_appid,"'","''") & "','" & Replace(For_App_GuestName,"'","''") & "'," & GBL_AppType & "," & GetTimeValue(DEF_Now) & ",'" & Replace(GBL_IPAddress,"'","''") & "')",1)
+		CALL LDExeCute("insert into LeadBBS_AppLogin(UserID,appid,GuestName,appType,ndatetime,IPAddress,Token) values(" & Form_ID & ",'" & Replace(Form_App_appid,"'","''") & "','" & Replace(Form_App_GuestName,"'","''") & "'," & GBL_AppType & "," & GetTimeValue(DEF_Now) & ",'" & Replace(GBL_IPAddress,"'","''") & "','" & Replace(Form_App_Token,"'","''") & "')",1)
 	End If
 
 End Sub
@@ -641,21 +641,22 @@ End Sub
 Function reg_checkAppidBinded
 	
 	Dim appInfo
-	For_App_GuestName = LeftTrue(GBL_CHK_User,20)
+	Form_App_GuestName = LeftTrue(GBL_CHK_User,20)
 	appInfo = Request.Cookies(DEF_MasterCookies & "_AppInfo")
 	Select Case CStr(GBL_AppType)
 		Case "1":					
 			If inStr(appInfo,",") Then appInfo = Split(appInfo,",")
 			If IsArray(appInfo) Then
 				If Ubound(appInfo,1) = 2 Then
+					Form_App_Token = LeftTrue(appInfo(1),64)
 					Form_App_appid = LeftTrue(appInfo(2),64)
 				End If
 			End If
-			If Len(Form_App_appid) < 16 or For_App_GuestName = "" Then
+			If Len(Form_App_appid) < 16 or Form_App_GuestName = "" Then
 				GBL_CHK_TempStr = "操作失败:QQ互联信息已经失效,请重新登录. <br>" & VbCrLf
 				reg_checkAppidBinded = 0
 				Exit Function
-			End If						
+			End If
 		Case else
 			GBL_CHK_TempStr = "操作失败:未知的互联商. <br>" & VbCrLf
 			reg_checkAppidBinded = 0

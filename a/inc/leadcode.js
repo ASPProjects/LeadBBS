@@ -117,7 +117,7 @@ function convertcode(str)
 	str = str.replace(/\[upload=([0-9]{1,14}),([0-9]{1,1})\](.+?)\[\/upload\]/gim,function($0,$1,$2,$3){return convertupload($1,$2,$3);});
 	str = str.replace(/\[em([0-9]{1,4})\]/gi,"<img src=\"" + HU + "images/UBBicon/em$1.GIF\" align=absmiddle>");
 
-	str = str.replace(/\[(\/?(u|b|i|sup|sub|strike|ul|ol|tr|td|pre|p|li))\]/gim,"<$1>");
+	str = str.replace(/\[(\/?(u|b|i|sup|sub|strike|ul|ol|tr|td|pre|p|li|blockquote))\]/gim,"<$1>");
 	str = str.replace(/\[td=([0-9]{1,2}),([0-9^\,]{1,2})[\,]?([#a-z0-9]{1,12}|rgb\([0-9\,\ ]{1,20}\))\]/gim,function($0,$1,$2,$3){var s=($3=="")?"":" bgColor="+$3;return("<td colspan=" + $1 + " rowspan=" + $2 + s + ">")});
 	str = str.replace(/\[hr\]/gim,"<hr size=1 class=splitline>");
 	str = str.replace(/\[(\/?)\*\]/gim,"<$1li>");
@@ -235,12 +235,13 @@ function convertcode(str)
 		else $1 = '<b class="grayfont">点击显示隐藏的内容 ...</b>'
 		return "<div style='border-top:1px solid #fff;border-bottom:1px solid #fff'><button style='font-size:12px;line-height:normal;padding:2px 5px 0px 5px;margin-right:5px;' onclick='this.parentNode.style.display=\"none\";this.parentNode.nextSibling.style.display=\"block\";' type='button'><b>+</b></button>"+$1+"</div><div style='border-top:1px solid #fff;border-bottom:1px solid #fff;display:none'>"+$2+"</div>"
 		});
+	str = str.replace(/\[@(.{2,20}?)\]/gi,function($0,$1){ return" <a href='"+HU+"user/lookuserinfo.asp?name="+encodeURIComponent($1)+"' class='username'>@"+$1+"</a> " } );//[@]
+
 	str = str.replace(/( |\n|\r|\t|\v|\<br\>|\uff1a|\:|\u3000)(http:\/\/|ftp:\/\/|https:\/\/|mms:\/\/|rtsp:\/\/|www.)([^# \f\n\r\t\v\<\u3000]*)/gi,function($0,$1,$2,$3){var u=$2;if(u.substr(0,4).toLowerCase()=='www.')u='http://'+u;return($1+getlink(url_filter(u+$3),$2+$3,0));});
 	str = str.replace(/^(http:\/\/|ftp:\/\/|https:\/\/|mms:\/\/|rtsp:\/\/|www.)([^# \f\n\r\t\v\<\u3000]*)/gi,function($0,$1,$2){var u=$1;if(u.substr(0,4).toLowerCase()=='www.')u='http://'+u;return(getlink(url_filter(u+$2),$1+$2,0));});
 	str = lead_multtb(str);
 	return str;
 }
-
 function convertcode_uw(str)
 {
 	str = str.replace(/\n/g, "");
@@ -294,6 +295,7 @@ function chklink(ul)
 	if(nn.length>3)
 	ur2=(nn[nn.length-3]+"."+ur);
 	var allowlist=GBL_domain;
+	if(GBL_domain=="|all|")return(1);
 	if(allowlist.indexOf("|"+ur+"|")>=0||(allowlist.indexOf("|"+ur2+"|")>=0 && ur2!=""))
 	{return(1);}
 	else
@@ -311,7 +313,7 @@ if (chklink(u) == 0)
 		
 		ed = " class=layer_alertclick onclick=\"layer_view('" + $replace($replace(t,String.fromCharCode(39),'\'+String.fromCharCode(39)+\''),'"','\'+String.fromCharCode(34)+\'') + "','','','','a_alt_link','','',0,'',0,-1314,'',event);return false;\"" + ed;
 	}
-return (t2 + "<a href=\"" + u + "\" target='_blank' " + ed + nm + "</a>");
+	return (t2 + "<a href=\"" + u + "\" target='_blank' " + ed + nm + "</a>");
 }
 
 function lead_multtb(s)
@@ -1061,4 +1063,4 @@ function lrc_getCurrentPosition(A,ty)
 	}
 	return 0;
 }
-//lrc end"
+//lrc end

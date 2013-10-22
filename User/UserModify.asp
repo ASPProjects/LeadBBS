@@ -64,7 +64,11 @@ Sub Main
 					GBL_CHK_TempStr = ""
 					checkFormData
 					If GBL_CHK_Flag = 0 Then
-						Response.Write "<div class='title redfont'>" & GBL_CHK_TempStr & "</div>" & VbCrLf
+						If ajaxflag <> "1" then
+							Response.Write "<div class='title redfont'>" & GBL_CHK_TempStr & "</div>" & VbCrLf
+						else
+							Response.Write "<script>alert(""" & replace(GBL_CHK_TempStr,"<br>","") & """)</script>" & VbCrLf
+						end if
 						JoinForm
 					Else
 						If SaveFormData = 1 Then
@@ -163,6 +167,8 @@ Sub User_CheckEnableUpload
 			EnableUpload = 0
 		End If
 	End If
+	
+	'If DEF_EnableGFL = 0 then EnableUpload = 0
 
 End Sub
 
@@ -178,6 +184,7 @@ Function GetUserData(ID)
 		Exit Function
 	End If
 	Form_UserName = Rs("UserName")
+	Old_Form_UserName = Form_UserName
 	Form_Mail = Rs("Mail")
 	Form_Address = Rs("Address")
 	Form_Sex = Rs("Sex")
@@ -231,6 +238,10 @@ Function GetUserData(ID)
 	Form_UserLimit = Rs("UserLimit")
 	Form_RevMessageFlag = GetBinaryBit(Form_UserLimit,13)
 	Form_SoundFlag = GetBinaryBit(Form_UserLimit,17)
+	Form_Question = Rs("Question")
+	Form_Answer = Rs("Answer")
+	OLd_Form_Question= Form_Question
+	OLd_Form_Answer = Form_Answer
 	Rs.Close
 	Set Rs = Nothing
 	GetUserData = 1
@@ -266,6 +277,7 @@ Function JoinForm
 	var user_DEF_faceMaxNum = <%=DEF_faceMaxNum%>;
 	var user_DEF_AllFaceMaxWidth = <%=DEF_AllFaceMaxWidth%>;
 	var user_DEF_AllDefineFace = <%=DEF_AllDefineFace%>;
+	var user_DEF_RegisterFile = "<%=replace(replace(DEF_RegisterFile,"\","\\"),"""","\""")%>";
 	-->
 	</script>
 	<script src="inc/usermodify.js?ver=<%=DEF_Jer%>" type="text/javascript"></script>
@@ -273,10 +285,12 @@ Function JoinForm
 	<%Modify_NavInfo%>
 	<div class=clear></div>
 			<%If EnableUpload = 0 Then%>
-			<form action=UserModify.asp method=post name=LeadBBSFm id="LeadBBSFm" onSubmit="submitonce(this);return ValidationPassed">
+			<form action=UserModify.asp?action=<%=urlencode(Form_Action)%><%
+			If Form_Action = "uploadface" then response.Write "&ajaxflag=1"
+			%> method=post name=LeadBBSFm id="LeadBBSFm" onSubmit="submitonce(this);return ValidationPassed">
 			<%Else%>
 			<form action=UserModify.asp?dontRequestFormFlag=1&action=<%=urlencode(Form_Action)%><%
-			If Form_Action = "uploadface" then response.write " target=hidden_frame"%> method=post name=LeadBBSFm id=LeadBBSFm enctype="multipart/form-data" onSubmit="submitonce(this);return ValidationPassed">
+			If Form_Action = "uploadface" then response.write "&ajaxflag=1 target=hidden_frame"%> method=post name=LeadBBSFm id=LeadBBSFm enctype="multipart/form-data" onSubmit="submitonce(this);return ValidationPassed">
 			<%End If%>
 			<input class='fminpt input_2' name=SubmitFlag type=hidden value="29d98Sasphouseasp8asphnet">
 			<table border=0 cellpadding="0" class="blanktable">
@@ -286,9 +300,17 @@ Function JoinForm
 					*用户名称： 
 				</td>
 				<td>
-					<%Response.Write Server.HtmlEncode(Form_Username)%>
+					<%If inStr(Old_Form_UserName,"#") Then%>
+					<div class=value2>您使用的是临时用户名 <%Response.Write Server.HtmlEncode(Form_Username)%> 请填写新的用户名：
+					</div>
+					<div class=value2><input onchange="reg_checkinfo('username',this.value);" class='fminpt input_3' maxlength=20 name=Form_UserName size=36 value="<% If Form_UserName<>"" and inStr(Form_UserName,"#") = 0 Then Response.Write Server.HtmlEncode(Form_UserName)%>">
+					<span id="reg_check_username"></span></div>
+					<%Else%>
+					<%Response.Write Server.HtmlEncode(Form_Username)
+					End If%>
 				</td>
 			</tr>
+			<%If Old_Form_Answer <> "" Then%>
 			<tr>
 				<td>
 					*旧的密码： 
@@ -297,12 +319,18 @@ Function JoinForm
 					<input class='fminpt input_2' maxLength=20 name="oldpass" size=14 type=password> 必须正确填写
 				</td>
 			</tr>
+			<%End If%>
 			<tr>
 				<td>
 					新的密码： 
 				</td>
 				<td>
-					<input class='fminpt input_2' maxLength=20 name="Form_password1" size=14 type=password Value="<% If Form_password1<>"" Then Response.Write Server.HtmlEncode(Form_password1)%>"> 不修改密码不必填写
+					<input class='fminpt input_2' maxLength=20 name="Form_password1" size=14 type=password Value="<% If Form_password1<>"" Then Response.Write Server.HtmlEncode(Form_password1)%>"> 
+					<%If inStr(Old_Form_UserName,"#") Then%>
+					请更改密码
+					<%else%>
+					不修改密码不必填写
+					<%end if%>
 				</td>
 			</tr>
 			<tr>
@@ -313,12 +341,51 @@ Function JoinForm
 					<input class='fminpt input_2' maxlength=20 name="Form_password2" size=14 type=password Value="<% If Form_password2<>"" Then Response.Write Server.HtmlEncode(Form_password2)%>">
 				</td>
 			</tr>
+			
+			<%If Old_Form_Answer = "" Then%>
 			<tr>
 				<td>
-					电子邮件： 
+					密码提示： 
 				</td>
 				<td>
-					<input class='fminpt input_3' maxLength=60 name=Form_mail size=36 Value="<% If Form_mail<>"" Then Response.Write Server.HtmlEncode(Form_mail)%>">
+	<script type="text/javascript">
+	<!--
+	function sel_question(list)
+	{
+		alert('a');
+		//if(list.value!='0'&&list.value!='99')$id('Form_Question').value=list.value;if(this.value=='99')$id('Form_Question').type='text';
+	}
+	-->
+	</script><div class=value2>
+					<select name="sel_question" onchange="if(this.value!=''&&this.value!='99')$id('Form_Question').value=this.value;if(this.value=='99'){this.style.display='none';$id('Form_Question').style.display='block';}else{$id('Form_Question').style.display='none';}">
+						<option value="" selected>--选择问题--</option>
+						<option value="我的家乡是？">我的家乡是？</option>
+						<option value="我妈妈的名字？">我妈妈的名字？</option>
+						<option value="最喜欢吃的食品？">最喜欢吃的食品？</option>
+						<option value="99">自定义...</option>
+					</select>
+					</div>
+					<div class=value2><input class='fminpt input_3' type="text" style="display:none;" maxlength=20 id=Form_Question name=Form_Question size=36 value="<% If Form_Question<>"" Then Response.Write Server.HtmlEncode(Form_Question)%>">
+					<div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					*提示答案：
+				</td>
+				<td>
+					<input class='fminpt input_3' maxlength=20 name=Form_Answer size=36 value="<% If Form_Answer<>"" Then Response.Write Server.HtmlEncode(Form_Answer)%>">
+					绑定网站登录，请先完善资料
+				</td>
+			</tr>
+			<%End If%>
+			<tr>
+				<td>
+					*电子邮件： 
+				</td>
+				<td>
+					<input class='fminpt input_3' onchange="reg_checkinfo('email',this.value);" maxLength=60 name=Form_mail size=36 Value="<% If Form_mail<>"" Then Response.Write Server.HtmlEncode(Form_mail)%>">
+					<span id="reg_check_email"></span>
 				</td>
 			</tr>
 			<tr>
@@ -438,8 +505,10 @@ Function JoinForm
 			<tr>
 				<td>&nbsp;</td>
 				<TD height="30">
+					<div id="submitdiv" style="<%If DEF_EnableGFL = 0 and Form_Action = "uploadface" Then response.write "display:none;"%>">
 					<input name=submit id=submit type=submit value="修改" onclick="form_onsubmit(this.form)" class="fmbtn btn_2">
 					<input name=b1 type=reset value="重写" class="fmbtn btn_2">
+					<div>
 				</td>
 			</tr>
 			</table>
@@ -482,11 +551,11 @@ Sub UploadFace
 			<tr>
 				<td colspan=2>
 				<%If EnableUpload = 1 Then%>
-				<a href="javascript:;" class="grayfont" onclick="$('#upload_type').value=1;$('#face_http3').show();$('#face_http').hide();$('#face_http2').hide();$('#face_system').hide();$('#face_upload').show();">上传头像</a> &nbsp; 
+				<a href="javascript:;" class="grayfont" onclick="$('#upload_type').value=1;<%if DEF_EnableGFL = 0 then%>$('#submitdiv').hide();<%end if%>$('#face_http3').show();$('#face_http').hide();$('#face_http2').show();$('#face_system').hide();$('#face_upload').show();">上传头像</a> &nbsp; 
 				<%End If%>
-				<a href="javascript:;" class="grayfont" onclick="$('#upload_type').value=2;$('#face_http3').show();$('#face_http2').hide();$('#face_http2').hide();$('#face_system').show();$('#face_upload').hide();">使用系统头像</a> &nbsp; 
+				<a href="javascript:;" class="grayfont" onclick="$('#upload_type').value=2;$('#submitdiv').show();$('#face_http3').show();$('#face_http2').hide();$('#face_http2').hide();$('#face_system').show();$('#face_upload').hide();">使用系统头像</a> &nbsp; 
 				<%If DEF_AllDefineFace <> 0 Then%>
-					<a href="javascript:;" class="grayfont" onclick="$('#upload_type').value=3;$('#face_http3').hide();$('#face_http2').hide();$('#face_http').show();$('#face_system').hide();$('#face_upload').hide();">使用网络图片</a>
+					<a href="javascript:;" class="grayfont" onclick="$('#upload_type').value=3;$('#submitdiv').show();$('#face_http3').hide();$('#face_http2').show();$('#face_http').show();$('#face_system').hide();$('#face_upload').hide();">使用网络图片</a>
 				<%End If%>
 				</span>
 				</td>
@@ -514,7 +583,7 @@ Sub UploadFace
 					自定义头像地址：
 				</td>
 				<td>
-					<input class='fminpt input_4' onchange="javascript:changeface2();" maxlength=250 name=Form_FaceUrl size=36 Value="<%=HtmlEncode(Form_FaceUrl)%>">
+					<input class='fminpt input_4' onchange="javascript:changeface2();" maxlength=250 id="Form_FaceUrl" name=Form_FaceUrl size=36 Value="<%=HtmlEncode(Form_FaceUrl)%>">
 				</td>
 			</tr>
 			<%
@@ -561,7 +630,7 @@ Sub UploadFace
 					<%End If%>
 					</div>
 					
-					<div style="float:left;margin-left:25px;" id=ajaxphoto>
+					<div style="float:left;margin-left:25px;<%If DEF_EnableGFL = 0 Then response.write "display:none;"%>" id=ajaxphoto>
 					<img src=<%=DEF_BBS_HomeUrl%>images/blank.gif id="photo">
 					</div>
 					
@@ -606,7 +675,20 @@ Function SaveFormData
 		end if
 			
 			If EnableUpload = 1 Then
-				User_ModifyUserFace
+				if User_ModifyUserFace = 2 then
+					sql = "update LeadBBS_User set Userphoto=" & Replace(Form_Userphoto,"'","''")
+					If DEF_AllDefineFace <> 0 Then
+						sql = sql & ",FaceUrl='" & Replace(Form_FaceUrl,"'","''") & "'"
+						sql = sql & ",FaceWidth=" & Replace(Form_FaceWidth,"'","''")
+						sql = sql & ",FaceHeight=" & Replace(Form_FaceHeight,"'","''")
+					Else
+						Form_FaceUrl = ""
+						Form_FaceWidth = ""
+						Form_FaceHeight = ""
+					End If
+					sql = sql & " Where id=" & GBL_UserID
+					CALL LDExeCute(SQL,1)
+				end if
 			End If
 		Case else
 			Form_RevMessageFlag = GetFormData("Form_RevMessageFlag")
@@ -677,6 +759,12 @@ Function SaveFormData
 				Form_UserTitle = ""
 			End If
 			
+			If Old_Form_Answer = "" then
+				Form_UserTitle = Form_UserTitle & ",username='" & replace(Form_UserName,"'","''") & "'"
+				Form_UserTitle = Form_UserTitle & ",question='" & replace(Form_question,"'","''") & "'"
+				Form_UserTitle = Form_UserTitle & ",answer='" & md5(Form_answer) & "'"
+				GBL_CHK_User = Form_UserName
+			end if
 			Dim SQL
 			SQL = "Update LeadBBS_User Set " & _
 			"Mail='" & Replace(Form_Mail,"'","''") & "'" & _
@@ -734,8 +822,9 @@ Sub Processor_Msg(str)
 
 End Sub
 
-Sub User_ModifyUserFace
+function User_ModifyUserFace
 
+	User_ModifyUserFace = 1
 	GBL_CHK_TempStr = ""
 	Dim file,FileName
 	set file = Form_UpClass.file("userface")	
@@ -760,8 +849,9 @@ Sub User_ModifyUserFace
 	end if
 	If FileName = "" Then
 		Set file = Nothing
-		Processor_Msg("error")
-		Exit Sub
+		Processor_Msg("ok2")
+		User_ModifyUserFace = 2
+		Exit function
 	End If
 	
 	Dim FileType,Tmp,FileSize
@@ -791,7 +881,7 @@ Sub User_ModifyUserFace
 	if ajaxflag = "1" and upload_step = "1" then
 		If GBL_CHK_TempStr <> "" Then			
 			Processor_Msg("error")
-			exit sub
+			exit function
 		end if
 		dim tmpFile : tmpFile = FileName
 		If inStrRev(tmpFile,".")>0 Then tmpFile = Mid(tmpFile,inStrRev(tmpFile,".")+1)
@@ -799,15 +889,15 @@ Sub User_ModifyUserFace
 			tmpFile = DEF_BBS_HomeUrl & "temp/uface_" & GBL_UserID & "." & tmpFile
 			file.saveas Server.MapPath(tmpFile)
 			Set file = Nothing
-			Processor_Msg(tmpFile)
+			If DEF_EnableGFL = 1 then Processor_Msg(tmpFile)
 		Else
 			Processor_Msg("error")
 		end if
-		exit sub
+		if DEF_EnableGFL = 1 then exit function
 	end if
 	If GBL_CHK_TempStr <> "" Then
 		Processor_Msg("error")
-		exit sub
+		exit function
 	end if
 	
 	UploadPhotoUrl = UploadPhotoUrl & "face/"
@@ -821,7 +911,7 @@ Sub User_ModifyUserFace
 	If inStr(NewFileName,".") = 0 Then
 		GBL_CHK_TempStr = "没有正确地选择要上传的文件, 注意上传的文件格式."
 		Processor_Msg("error")
-		Exit Sub
+		Exit function
 	End If
 
 	Pic_Name1 = GetSaveFileName(NewFileName)
@@ -829,6 +919,7 @@ Sub User_ModifyUserFace
 	UploadPhotoUrl2 = UploadPhotoUrl & Pic_Name2
 	UploadPhotoUrl = UploadPhotoUrl & Pic_Name1
 	Pic_Name = Pic_Name1
+	
 	
 	Dim Temp,Old_pic_name
 	Old_pic_name = pic_name
@@ -840,7 +931,7 @@ Sub User_ModifyUserFace
 	Dim Temp_File
 	Temp_File = Server.MapPath(DEF_BBS_HomeUrl & "temp/uface_" & GBL_UserID & "." & pic_name)
 	
-	if cropflag = 1 then
+	if cropflag = 1 and DEF_EnableGFL = 1 then
 		Dim MyObj
 		Set MyObj = Server.CreateObject("Persits.Jpeg")
 		MyObj.open Temp_File
@@ -852,7 +943,14 @@ Sub User_ModifyUserFace
 	Set file = Nothing
 	
 	If DEF_EnableGFL = 1 Then
-		Temp = SaveSmallPic(Temp_File,PhotoDir & pic_name2,DEF_AllFaceMaxWidth,DEF_AllFaceMaxWidth,-2)
+		GBL_Width = GetPicInfo(Temp_File,"width")
+		GBL_Height = GetPicInfo(Temp_File,"height")
+		If GBL_Width <= DEF_AllFaceMaxWidth and GBL_Height <= DEF_AllFaceMaxWidth Then
+			Temp = 2
+			call MoveFiles(Temp_File,replace(PhotoDir & pic_name2,"s.","."))
+		else
+			Temp = SaveSmallPic(Temp_File,PhotoDir & pic_name2,DEF_AllFaceMaxWidth,DEF_AllFaceMaxWidth,-2)
+		end if
 		If Temp = 4 Then
 			If inStrRev(UploadPhotoUrl2,".")>0 Then
 				UploadPhotoUrl2 = Left(UploadPhotoUrl2,inStrRev(UploadPhotoUrl2,".")) & "jpg"
@@ -914,9 +1012,13 @@ Sub User_ModifyUserFace
 				DeleteFiles(PhotoDir & Old_pic_name)
 			End If
 		End If
-	Else		
+	Else
 		If pic_name = "gif" or pic_name = "jpg" or pic_name = "jpeg" or pic_name = "jpe" or pic_name = "bmp" or pic_name = "png" Then
-			CheckUploadDatabase PhotoDir & Old_pic_name,""
+			call MoveFiles(Temp_File,replace(PhotoDir & pic_name2,"s.","."))
+			'CheckUploadDatabase PhotoDir & Old_pic_name,""
+			If DEF_EnableGFL = 0 then Processor_Msg(UploadPhotoUrl)
+			CheckUploadDatabase replace(PhotoDir & pic_name2,"s.","."),""
+			response.write "Update LeadBBS_User Set FaceUrl='" & Replace(UploadPhotoUrl,"'","''") & "',FaceWidth=" & GBL_Width & ",FaceHeight=" & GBL_Height & " where ID=" & GBL_UserID
 			CALL LDExeCute("Update LeadBBS_User Set FaceUrl='" & Replace(UploadPhotoUrl,"'","''") & "',FaceWidth=" & GBL_Width & ",FaceHeight=" & GBL_Height & " where ID=" & GBL_UserID,1)
 		Else
 			GBL_CHK_TempStr = "非图像文件,上传错误"
@@ -924,13 +1026,14 @@ Sub User_ModifyUserFace
 		End If
 	End If
 	if GBL_CHK_TempStr <> "" Then
-		Processor_Msg("error")
+		User_ModifyUserFace = 2
+		If DEF_EnableGFL = 1 then Processor_Msg("error")
 	else
-		Processor_Msg("ok")
+		If DEF_EnableGFL = 1 then Processor_Msg("ok")
 	end if
 	'DeleteFiles Temp_File
 
-End Sub
+End function
 
 
 Function GetSaveFileName(name)

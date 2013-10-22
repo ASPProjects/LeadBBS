@@ -449,17 +449,21 @@ function edt_checkContent()
 function edt_getcodemode()
 {
 	var obj=$id('LeadBBSFm');
-	var codemode=(isUndef(obj.Form_HTMLFlag[0])?0:1);
+	var codemode = 2;
+	if(obj.Form_HTMLFlag)
+	{
+		codemode=(isUndef(obj.Form_HTMLFlag[0])?0:1);
 	
-	if(!codemode)
-	{
-		codemode=(obj.Form_HTMLFlag.checked?2:0)
-	}
-	else
-	{
-		if(obj.Form_HTMLFlag[0].checked)codemode=0;
-		if(obj.Form_HTMLFlag[1].checked)codemode=1;
-		if(obj.Form_HTMLFlag[2].checked)codemode=2;
+		if(!codemode)
+		{
+			codemode=(obj.Form_HTMLFlag.checked?2:0)
+		}
+		else
+		{
+			if(obj.Form_HTMLFlag[0].checked)codemode=0;
+			if(obj.Form_HTMLFlag[1].checked)codemode=1;
+			if(obj.Form_HTMLFlag[2].checked)codemode=2;
+		}
 	}
 	return codemode;
 }
@@ -827,12 +831,12 @@ function edt_htm2code(str)
 	str = str.replace(/\n/gim,"");
 
 	str = str.replace(/\<div (.[^\[\>]*)\>/gi,"<p $1>");
-	str = str.replace(/\<div>/gi,"<p>");
-	str = str.replace(/\<\/div>/gi,"</p>");
+	str = str.replace(/\<div\>/gi,"<p>");
+	str = str.replace(/\<\/div\>/gi,"</p>");
 
-	str = str.replace(/\<(tr|td|sup|sub|ul|ol|i|u|b|STRIKE|li|hr) (.[^\[\>]*)\>/gi,"[$1]");
-	str = str.replace(/\<(tr|td|sup|sub|ul|ol|i|u|b|STRIKE|li|hr)\>/gi,"[$1]");
-	str = str.replace(/\<\/(tr|td|sup|sub|ul|ol|i|u|b|STRIKE|li|hr)\>/gi,"[/$1]");
+	str = str.replace(/\<(tr|td|sup|sub|ul|ol|i|u|b|STRIKE|li|hr|blockquote) (.[^\[\>]*)\>/gi,"[$1]");
+	str = str.replace(/\<(tr|td|sup|sub|ul|ol|i|u|b|STRIKE|li|hr|blockquote)\>/gi,"[$1]");
+	str = str.replace(/\<\/(tr|td|sup|sub|ul|ol|i|u|b|STRIKE|li|hr|blockquote)\>/gi,"[/$1]");
 
 	str = str.replace(/\<li (.[^\[\>]*)\>/gi,"[LI]");
 	str = str.replace(/\<li>/gi,"[LI]");
@@ -1027,6 +1031,8 @@ var editor_oldview=null,editor_oldobj=null,editor_sAction="",editor_viewn=0;
 
 function editor_view(obj,menu,file,js)
 {
+	var editdir = "";
+	if (typeof editFile_dir != "undefined")editdir = editFile_dir;
 	editor_saveRange();
 	LD.clearOldLayer();
 	var menuobj=$id(menu);
@@ -1041,10 +1047,10 @@ function editor_view(obj,menu,file,js)
 	}
 	if(file && menuobj.innerHTML=="loading...")
 	{
-		getAJAX("Edit/" + file,"",menu,0,"$import(\"Edit/" + js + "\",\"js\");");
+		getAJAX(editdir+"Edit/" + file,"",menu,0,"$import(\"" + editdir.replace(/\\/,"\\") + "Edit/" + js + "\",\"js\");");
 	}
 	if(file=="" && js)
-	{$import("Edit/" + js,"js");}
+	{$import(editdir+"Edit/" + js,"js");}
 
 	if(menuobj.style.display == 'block' &&editor_sAction!="bgcolor"&&editor_sAction!="bordercolor")
 	{
@@ -1061,10 +1067,6 @@ function editor_view(obj,menu,file,js)
 	menuobj.style.left = x + 'px';
 	menuobj.style.display = 'block';
 	relocationxy(obj.id,menuobj.id,1);
-}
-
-function symbol_ov(obj){
-	$id('sym_preview').innerHTML=obj.innerHTML;
 }
 
 function symbol_inst(obj){

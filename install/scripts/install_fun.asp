@@ -400,8 +400,10 @@ sub install_step3form
 
 	if mysqlversion = "1" then
 		mysqlversion = 1
-	else
+	elseif dtype = "0" then
 		mysqlversion = 0
+	else
+		mysqlversion = 2
 	end if
 	
 	if submitflag = "true" then
@@ -420,14 +422,18 @@ sub install_step3form
 				setupstr = "data/global.asa"
 				constr = "Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & mapFile(DEF_BBS_HomeUrl & setupstr)
 			case 2:
-				if mysqlversion = 0 then
-					setupstr = "Driver={Mysql ODBC 5.1 Driver};SERVER=" & filterStr(mysql_server) & ";"
-					if mysql_port > 0 then
-						setupstr = setupstr & "PORT=" & mysql_port & ";"
-					end if
-					setupstr = setupstr & "DATABASE=" & filterStr(mysql_databasename) & ";UID=" & filterStr(mysql_uid) & ";PWD=" & filterStr(mysql_pwd) & ";charset=gbk;"
-				else
+				select case mysqlversion
+					case 0:
+						setupstr = "Driver={Mysql ODBC 5.1 Driver};SERVER=" & filterStr(mysql_server) & ";"
+					case 1:
+						setupstr = "Driver={Mysql ODBC 3.51 Driver};SERVER=" & filterStr(mysql_server) & ";"
+					case 2:
+						setupstr = "Driver={Mysql ODBC 5.2 ANSI Driver};SERVER=" & filterStr(mysql_server) & ";"
+				end select
+				if mysql_port > 0 then
+					setupstr = setupstr & "PORT=" & mysql_port & ";"
 				end if
+				setupstr = setupstr & "DATABASE=" & filterStr(mysql_databasename) & ";UID=" & filterStr(mysql_uid) & ";PWD=" & filterStr(mysql_pwd) & ";charset=gbk;"
 				constr = setupstr
 		end select
 
@@ -551,9 +557,9 @@ sub install_step3form
 	<span class="name">
 	ODBC版本：
 	</span>
+	<input class=fmchkbox type=radio name=mysqlversion value=2 <%If mysqlversion = 2 Then Response.Write " checked"%> />Mysql ODBC 5.2 Driver
 	<input class=fmchkbox type=radio name=mysqlversion value=0 <%If mysqlversion = 0 Then Response.Write " checked"%> />Mysql ODBC 5.1 Driver
 	<input class=fmchkbox type=radio name=mysqlversion value=1 <%If mysqlversion = 1 Then Response.Write " checked"%> />Mysql ODBC 3.51 Driver
-	<span class="info">可以咨询空间提供商</span>
 	</div>
 	
 	<div class="line">

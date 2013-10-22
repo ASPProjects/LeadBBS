@@ -2,8 +2,11 @@
 <!-- #include file=Str_Fun.asp -->
 <!-- #include file=MD5.asp -->
 <%
+Const OPEN_DEBUG = 1
+Const DEBUG_User = "Super"
+
 If inStr(Lcase(Request.Servervariables("SCRIPT_NAME")),"board_popfun.asp") > 0 Then Response.End
-Const DEF_Jer = "?ver=2013022713"
+Const DEF_Jer = "?ver=2013022715"
 Const DEF_mustDefaultStyle = -1
 
 Dim DEF_PageExeTime1,GBL_DBNum,GBL_DBWrite,con,GBL_ConFlag,GBL_CheckPassDoneFlag,GBL_FileDir,GBL_SideFlag,CursorLocation,GBL_HeadResource
@@ -74,6 +77,10 @@ GBL_CHK_LastWriteTime = 0
 
 Dim GBL_AppType
 GBL_AppType = "0"
+
+
+Dim LMT_EnableRewrite
+LMT_EnableRewrite = GetBinarybit(DEF_Sideparameter,16)
 
 REM *******Chat Start*******
 
@@ -220,6 +227,7 @@ Function GBL_CheckLimitContent(Pass,lmt,otherlmt,HiddenFlag)
 
 End Function
 
+dim sqlstring
 Function LDExeCute(sql,flag)
 
 	'flag 0 读,并且返回 1 写,不返回 2 读,不返回 3 写,返回
@@ -227,6 +235,7 @@ Function LDExeCute(sql,flag)
 	on error resume next
 	'If Err Then Err.Clear
 	'Response.Write "<P>" & sql
+	if OPEN_DEBUG = 1 and DEBUG_User = GBL_CHK_User Then sqlstring = sqlstring & "<li><span class=bluefont>" & FormatNumber(cCur(Timer - DEF_PageExeTime1),4,True) & "</span> " & htmlencode(sql) & "</li>" & VbCrLf
 	'Response.Write "<br>sql:" & sql & "<br>Page created in " & FormatNumber(cCur(Timer - DEF_PageExeTime1),4,True) & " seconds width " & GBL_DBNum & " queries."
 
 	If DEF_UsedDataBase = 2 Then
@@ -371,7 +380,7 @@ Sub UpdateOnlineUserAtInfo(BoardID,AtInfo)
 	Else
 		AtBoardIDCookie = cCur(AtBoardIDCookie)
 		If isTrueDate(GBL_CookieTime) = 1 Then
-			If DateDiff("s",GBL_CookieTime,DEF_Now) < 240 and AtBoardIDCookie = BoardID Then Exit Sub
+			If DateDiff("s",GBL_CookieTime,DEF_Now) < 240 and (AtBoardIDCookie = BoardID or GetBinarybit(DEF_Sideparameter,6) = 0) Then Exit Sub
 			If AtBoardIDCookie <> BoardID and isArray(GBL_UDT) Then
 				Response.Cookies(DEF_MasterCookies & "AtBD") = BoardID
 				Response.Cookies(DEF_MasterCookies & "AtBD").Domain = DEF_AbsolutHome
@@ -507,11 +516,21 @@ Sub DisplayBBSNavigate(BoardID,Str)
 		<div class="navigate_sty">
 			<div class="navigate_string">
 			<%
-			If DEF_SiteHomeUrl = "" Then DEF_SiteHomeUrl = DEF_BBS_HomeUrl & "Boards.asp"
+			'If DEF_SiteHomeUrl = "" Then DEF_SiteHomeUrl = DEF_BBS_HomeUrl & "Boards.asp"
 			If GBL_Board_BoardAssort = "" and Str = "" Then
-				Response.Write "<span class=""navigate_string_home"">" & DEF_BBS_Name & "</span>"
+				If DEF_SiteHomeUrl <> "" and DEF_SiteNameString <> "" Then
+					Response.Write "<span class=""navigate_string_home"">" & DEF_SiteNameString & "</span>"
+					Response.Write "<span class=""navigate_string_step"">" & DEF_BBS_Name & "</span>"
+				else
+					Response.Write "<span class=""navigate_string_home"">" & DEF_BBS_Name & "</span>"
+				end if
 			Else
-				Response.Write "<span class=""navigate_string_home""><a href=""" & DEF_BBS_HomeUrl & "Boards.asp"">" & DEF_BBS_Name & "</a></span>"
+				If DEF_SiteHomeUrl <> "" and DEF_SiteNameString <> "" Then
+					Response.Write "<span class=""navigate_string_home""><a href=" & DEF_SiteHomeUrl & ">" & DEF_SiteNameString & "</a></span>"
+					Response.Write "<span class=""navigate_string_step""><a href=""" & DEF_BBS_HomeUrl & "Boards.asp"">" & DEF_BBS_Name & "</a></span>"
+				else
+					Response.Write "<span class=""navigate_string_home""><a href=""" & DEF_BBS_HomeUrl & "Boards.asp"">" & DEF_BBS_Name & "</a></span>"
+				end if
 				If GBL_Board_BoardName="" Then 
 					If GBL_Board_AssortName<>"" Then Response.Write "<span class=""navigate_string_step"">" & GBL_Board_AssortName & "</span>"
 				Else
@@ -605,7 +624,7 @@ Sub navigate_sidecontrol
 		{
 			if($id('p_side').innerHTML.length < 30)
 			{
-				var js = "$id(\"p_side\").innerHTML=tmp;js_Reload($id(\"p_side\"));"
+				var js = "$(\"#p_side\").html(tmp);"
 			<%If GBL_Board_ID < 1 Then%>
 				getAJAX("Boards.asp","ol=side",js,1);
 			<%Else%>
@@ -637,7 +656,7 @@ If Chat_EnablePageRequest = 1 Then
 <a href="<%=DEF_BBS_HomeUrl%>User/MyInfobox.asp" id="c_pub_mes" class="head_privatemsg<%
 If (GBL_CHK_MessageFlag = 1) Then Response.Write "_new"
 %>" title="短信息提示"><span id="c_pub_mes_txt"><%
-If GBL_CHK_MessageFlag = 0 or GBL_CHK_MessageFlag = False Then%>
+If GBL_CHK_MessageFlag <> 1 Then%>
 收件箱<%
 Else%>您有新的消息<%
 End If%></span></a>
@@ -659,7 +678,7 @@ var c_User="<%=urlencode(GBL_CHK_User)%>";
 Exit Sub '聊天信息则退出
 End If
 REM *******Chat End*********
-	If GBL_CHK_MessageFlag = 0 Then
+	If GBL_CHK_MessageFlag <> 1 Then
 		If GBL_CHK_User <> "" Then%>
 					<a href="<%=DEF_BBS_HomeUrl%>User/MyInfobox.asp" class="head_privatemsg">收件箱</a><%
 		End If
@@ -1181,7 +1200,7 @@ Sub SiteHead(headString)
 		If GBL_Board_BoardStyle < 10000 Then Response.Write "0"
 		Response.Write GBL_Board_BoardStyle
 	End If
-	%>.css" title="cssfile" />
+	%>.css<%=DEF_Jer%>" title="cssfile" />
 	<script type="text/javascript">
 	<!--
 	var DEF_MasterCookies = "<%=htmlencode(DEF_MasterCookies)%>";
@@ -1405,7 +1424,7 @@ Next%>
 				If GBL_Board_ID > 0 Then
 					Response.Write "?" & GBL_Board_ID
 					If Request.QueryString("ID") <> "" Then
-						Response.Write "-" & Request.QueryString("ID") & "-0-0-0-0-0-a-.htm"
+						Response.Write "-" & filterUrlstr(Request.QueryString("ID")) & "-0-0-0-0-0-a-.htm"
 					Else
 						Response.Write "-0-0-0-0-0-0-b-.htm"
 					End If
@@ -1423,6 +1442,23 @@ Next%>
 
 End Sub
 
+Sub PageExeCuteInfo
+%>
+
+				<div class="version">
+					Powered by <a href="http://www.leadbbs.com/" target="_blank"><b><%=DEF_Version%></b></a>
+					<a href="http://www.leadbbs.com/other/register?"></a>.
+				</div>
+				<div class="createtime" id="createtime">
+				<%
+		Response.Write " Page created in " & FormatNumber(cCur(Timer - DEF_PageExeTime1),4,True) & " seconds with " & GBL_DBNum & " queries."
+		if OPEN_DEBUG = 1 and DEBUG_User = GBL_CHK_User Then %>
+		<div style="text-align:left;background:white;color:black;"><ul><%=sqlstring%></ul></div>
+		<%End If%>
+				</div>
+<%
+End Sub
+
 Sub SiteBottom
 
 	%>
@@ -1435,15 +1471,7 @@ Sub SiteBottom
 					Copyright <span style="font:11px Tahoma,Arial,sans-serif;">&copy;</span>2003-<%=year(DEF_Now)%>&nbsp;<%=DEF_SiteNameString%>
 					- <a href="javascript:;" onclick="LD.Cookie.Clear();">清空COOKIE</a><%=DEF_BottomInfo%>
 				</div>
-				<div class="version">
-					Powered by <a href="http://www.leadbbs.com/" target="_blank"><b><%=DEF_Version%></b></a>
-					<a href="http://www.leadbbs.com/other/register?"></a>.
-				</div>
-				<div class="createtime" id="createtime">
-				<%
-		Response.Write " Page created in " & FormatNumber(cCur(Timer - DEF_PageExeTime1),4,True) & " seconds with " & GBL_DBNum & " queries."
-		%>
-				</div>
+				<%PageExeCuteInfo%>
 				</div>
 			</div>
 	<script type="text/javascript">
@@ -1463,9 +1491,18 @@ Sub SiteBottom
 	<%Global_SiteBottom%>
 	<div class="bottom_ad">
 	<div class="area">
+	<div id="bottom_ad">
+	<%Response.Write "<!--"%>
 	<!-- #include file=incHtm/Bottom_AD.asp -->
+	<%Response.Write "-->"%>
 	</div>
 	</div>
+	</div>
+	
+<script src=<%=DEF_BBS_HomeUrl%>inc/js/writecapture/writeCapture.js></script>
+<script src=<%=DEF_BBS_HomeUrl%>inc/js/writecapture/jquery.writeCapture.js></script>
+	<script src="<%=DEF_BBS_HomeUrl%>inc/js/ad.js?123" type="text/javascript">
+	</script>
 	</body>
 	</html><%
 

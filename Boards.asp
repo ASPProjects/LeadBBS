@@ -538,6 +538,10 @@ Sub Main
  
 	UpdateOnlineUserAtInfo 0,"ÂÛÌ³Ê×Ò³"
 
+	%>
+	<div class="area">
+	<div id="ad_hometop"></div></div>
+	<%
 	If SideFlag = 1 Then
 		Boards_Body_Head("")
 	Else
@@ -546,6 +550,11 @@ Sub Main
 	DisplayBoardInfo
 	DisplayBoard
 	Boards_Body_Bottom
+	%>
+	<div class="clear"></div>
+	<div class="area">
+	<div id="ad_homebottom"></div></div>
+	<%
 	closeDataBase
 	SiteBottom
 

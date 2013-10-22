@@ -214,7 +214,7 @@ Function UserBrowser
 <%
 		For N = MinN to MaxN Step StepValue
 			%>
-	<tr bgcolor="<%=DEF_BBS_LightestColor%>" class=TBBG9>
+	<tr class=TBBG9>
 		<td class=tdbox><%=GetData(0,n)%></td>
 		<td class=tdbox>
   			<a href=<%=DEF_BBS_HomeUrl%>User/LookUserInfo.asp?id=<%=GetData(0,n)%>><%=htmlencode(GetData(1,n))%></a>
@@ -231,7 +231,7 @@ Function UserBrowser
 			If i > DEF_MaxListNum then Exit For
 		next
 %>
-	<tr bgcolor=<%=DEF_BBS_TableHeadColor%> class=TBfour>
+	<tr class=TBfour>
 		<td class=tdbox height="30" valign="bottom" colspan=5>
 			<table width="100%" border="0" cellspacing="0" cellpadding="0">
 			<tr>

@@ -8,7 +8,7 @@ initDatabase
 GBL_CHK_TempStr = ""
 checkSupervisorPass
 
-Dim ReqN,WriteN,SiteLink_Flag,SiteLink_Title,SiteLink_Name,SiteLink_WriteFile
+Dim ReqN,WriteN,SiteLink_Flag,SiteLink_Title,SiteLink_Name,SiteLink_WriteFile,SiteLink_Info
 SiteLink_Flag = 0
 If Request.QueryString("SiteLink_Flag") = "10" Then SiteLink_Flag = 10
 
@@ -17,6 +17,7 @@ Case 10:
 	SiteLink_Title = "广告"  '栏目标题
 	SiteLink_Name = "广告"   '项目名字
 	SiteLink_WriteFile = "inc/AD_Data.asp"  '写入文件地址(相对于论坛根目标)
+	SiteLink_Info = "帖间广告：在主题帖和1楼帖中随机显示您所添加的广告"
 Case Else:
 	SiteLink_Flag = 0
 	SiteLink_Title = "友情链接"
@@ -131,9 +132,9 @@ function additem()
 		this.SiteString.innerHTML+="<div class=frameline><%=SiteLink_Name%>"+Number+"</div>";
 		this.SiteString.innerHTML+="<div class=frameline><%=SiteLink_Name%>名称：<input type=text name=SiteName"+Number+" maxlength=255 size=50 class=fminpt></div>";
 		this.SiteString.innerHTML+="<div class=frameline>链接地址：<input type=text name=SiteUrl"+Number+" maxlength=255 size=50 class=fminpt></div>";
-		this.SiteString.innerHTML+="<div class=frameline>LOGO地址：<input type=text name=LogoUrl"+Number+" maxlength=255 size=50 class=fminpt></div>";
-		this.SiteString.innerHTML+="<div class=frameline>LOGO宽度：<input type=text name=LogoWidth"+Number+" maxlength=5 size=5 value=88 class=fminpt></div>";
-		this.SiteString.innerHTML+="<div class=frameline>LOGO高度：<input type=text name=LogoHeight"+Number+" maxlength=5 size=5 value=31 class=fminpt></div>";
+		this.SiteString.innerHTML+="<div class=frameline>图片地址：<input type=text name=LogoUrl"+Number+" maxlength=255 size=50 class=fminpt></div>";
+		this.SiteString.innerHTML+="<div class=frameline>图片宽度：<input type=text name=LogoWidth"+Number+" maxlength=5 size=5 value=88 class=fminpt></div>";
+		this.SiteString.innerHTML+="<div class=frameline>图片高度：<input type=text name=LogoHeight"+Number+" maxlength=5 size=5 value=31 class=fminpt></div>";
 		<%If SiteLink_Flag = 0 Then%>
 		this.SiteString.innerHTML+="<div class=frameline>是否换行：<input type=text name=BreakFlag"+Number+" maxlength=5 size=5 value=0 class=fminpt></div>";
 		<%End If%>
@@ -160,9 +161,9 @@ Sub DisplayDatabaseLink
 		<div class="frameline"><%=SiteLink_Name%>1</div>
 		<div class=frameline><%=SiteLink_Name%>名称：<input type="text" name="SiteName1" maxlength="255" size="50" class=fminpt>(允许HTML)</div>
 		<div class=frameline>链接地址：<input type="text" name="SiteUrl1" maxlength="255" size="50" class=fminpt></div>
-		<div class=frameline>LOGO地址：<input type="text" name="LogoUrl1" maxlength="255" size="50" class=fminpt></div>
-		<div class=frameline>LOGO宽度：<input type="text" name="LogoWidth1" maxlength="5" size="5" value=88 class=fminpt></div>
-		<div class=frameline>LOGO高度：<input type="text" name="LogoHeight1" maxlength="5" size="5" value=31 class=fminpt></div>
+		<div class=frameline>图片地址：<input type="text" name="LogoUrl1" maxlength="255" size="50" class=fminpt></div>
+		<div class=frameline>图片宽度：<input type="text" name="LogoWidth1" maxlength="5" size="5" value=88 class=fminpt></div>
+		<div class=frameline>图片高度：<input type="text" name="LogoHeight1" maxlength="5" size="5" value=31 class=fminpt></div>
 		<%If SiteLink_Flag = 0 Then%>
 		<div class=frameline>是否换行：<input type="text" name="BreakFlag1" maxlength="5" size="5" class=fminpt>另起一行排版，1-换行，0-自动</div>
 		<%End If%>
@@ -188,9 +189,9 @@ Sub DisplayDatabaseLink
 		<input type="hidden" name="SiteID<%=ReqN%>" Value="<%=GetData(0,SQL)%>">
 		<div class=frameline><%=SiteLink_Name%>名称：<input type="text" name="SiteName<%=ReqN%>" maxlength="255" size="50" Value="<%=htmlencode(GetData(1,SQL))%>" class=fminpt>(允许HTML)</div>
 		<div class=frameline>链接地址：<input type="text" name="SiteUrl<%=ReqN%>" maxlength="255" size="50" Value="<%=htmlencode(GetData(2,SQL))%>" class=fminpt></div>
-		<div class=frameline>LOGO地址：<input type="text" name="LogoUrl<%=ReqN%>" maxlength="255" size="50" Value="<%=htmlencode(GetData(3,SQL))%>" class=fminpt></div>
-		<div class=frameline>LOGO宽度：<input type="text" name="LogoWidth<%=ReqN%>" maxlength="5" size="5" Value="<%=htmlencode(GetData(5,SQL))%>" class=fminpt></div>
-		<div class=frameline>LOGO高度：<input type="text" name="LogoHeight<%=ReqN%>" maxlength="5" size="5" Value="<%=htmlencode(GetData(6,SQL))%>" class=fminpt></div>
+		<div class=frameline>图片地址：<input type="text" name="LogoUrl<%=ReqN%>" maxlength="255" size="50" Value="<%=htmlencode(GetData(3,SQL))%>" class=fminpt></div>
+		<div class=frameline>图片宽度：<input type="text" name="LogoWidth<%=ReqN%>" maxlength="5" size="5" Value="<%=htmlencode(GetData(5,SQL))%>" class=fminpt></div>
+		<div class=frameline>图片高度：<input type="text" name="LogoHeight<%=ReqN%>" maxlength="5" size="5" Value="<%=htmlencode(GetData(6,SQL))%>" class=fminpt></div>
 		<%If SiteLink_Flag = 0 Then%>
 		<div class=frameline>是否换行：<input type="text" name="BreakFlag<%=ReqN%>" maxlength="5" size="5" Value="<%=htmlencode(GetData(7,SQL))%>" class=fminpt>另起一行排版，1-换行，0-自动</div>
 		<%End If%>

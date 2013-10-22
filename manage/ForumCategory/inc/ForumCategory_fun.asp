@@ -357,4 +357,5 @@ Function SetBinarybit(Number,bit,value)
 	End If
 
 End Function
+
 %>

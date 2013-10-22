@@ -93,7 +93,7 @@ Sub Assessor
 					End If
 				End If
 				CALL LDExeCute("Delete from LeadBBS_Assessor where ID=" & DelID,1)
-				Response.Redirect DEF_BBS_HomeUrl & "a/a.asp?b=" & Request("pb") & "&id=" & Rs(1)
+				'Response.Redirect DEF_BBS_HomeUrl & "a/a.asp?b=" & Request("pb") & "&id=" & Rs(1)
 			Else
 				Response.Write "错误，要审核的帖子并不存在！"
 				Exit Sub

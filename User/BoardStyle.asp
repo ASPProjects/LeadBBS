@@ -28,7 +28,7 @@ Public Sub Main_Style
 
 	Dim HomeUrl,u
 	HomeUrl = "http://"&Request.ServerVariables("server_name")
-	u = Request("u")
+	u = filterUrlstr(Request("u"))
 	
 	If Left(u,1) <> "/" and Left(u,1) <> "\" and Left(u,Len(HomeUrl)) <> HomeUrl and LCase(Left(u,9)) <> "frame.asp" and LCase(Left(u,12)) <> "../frame.asp" Then u = ""
 	
@@ -48,7 +48,7 @@ Public Sub Main_Style
 	End If
 	
 	If u = "" Then
-		u = Lcase(Request.ServerVariables("HTTP_REFERER"))
+		u = filterUrlstr(Lcase(Request.ServerVariables("HTTP_REFERER")))
 	
 		If Request.ServerVariables("SERVER_PORT") <> "80" Then HomeUrl = HomeUrl & ":" & Request.ServerVariables("SERVER_PORT")
 	
@@ -121,7 +121,7 @@ Private Function DisplayBoardStyleList(u)
 	else
 		
 		Dim Url
-		Url = Left(Request("dir"),100)
+		Url = filterUrlstr(Left(Request("dir"),100))
 		If Url = "" and inStr(Request.QueryString,"dir=")=0 Then
 			Url = DEF_BBS_HomeUrl
 		End If

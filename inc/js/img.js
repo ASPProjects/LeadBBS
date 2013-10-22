@@ -25,7 +25,7 @@
 					$(this).siblings().removeAttr("class");
 					pi_save = pi_save.indexOf("F" + ti+"_")!=-1?pi_save.replace((new RegExp("F"+ti+"_\\d+","gi")),"F"+ti+"_"+i):pi_save+"F"+ti+"_"+i;
 				});
-				setTimeout("pi_show('" + sel + "',0," + pi_count + ")", 4000);
+				if($(sel + " li").length>1)setTimeout("pi_show('" + sel + "',0," + pi_count + ")", 4000);
 				$(sel).hover(function(){pi_cur=this.id;}, function(){pi_cur="";});
 			}
 		}

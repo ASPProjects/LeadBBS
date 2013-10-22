@@ -123,12 +123,22 @@ Sub RSS_View
 			if GetData(7,N) <> "" then GetData(7,N) = "最后回复：" & HtmlEncode(GetData(7,N)) & " at " & RestoreTime(GetData(5,N)) & VbCrLf
 			Response.Write "<item>" & VbCrLf
 			Response.Write "<title><![CDATA[ " & HtmlEncode(GetData(2,N)) & " ]]></title>" & VbCrLf
-			Response.Write "<link>" & MyHomeUrl & "a/a.asp?b=" & GetData(1,N) & "&amp;ID=" & GetData(0,N) & "</link>" & VbCrLf
+			if LMT_EnableRewrite = 0 then
+				Response.Write "<link>" & MyHomeUrl & "a/a.asp?b=" & GetData(1,N) & "&amp;ID=" & GetData(0,N) & "</link>" & VbCrLf
+			else
+				Response.Write "<link>" & MyHomeUrl & "a/topic-" & GetData(1,N) & "-" & GetData(0,N) & "-1.html</link>" & VbCrLf
+			end if
 			Response.Write "<author><![CDATA[ " & HtmlEncode(GetData(6,N)) & " ]]></author>" & VbCrLf
 			Response.Write "<category><![CDATA[ " & HtmlEncode(KillHTMLLabel(GetData(9,N))) & " ]]></category>" & VbCrLf
 			Response.Write "<pubDate>" & RestoreTime(GetData(4,N)) & "</pubDate>" & VbCrLf
 			Response.Write "<description><![CDATA[ " & GetData(7,N)
-			Response.Write "<br>所在版面：<a href=" & MyHomeUrl & "b/b.asp?b=" & GetData(1,N) & ">" & HtmlEncode(KillHTMLLabel(GetData(9,N))) & "</a>" & VbCrLf
+			Response.Write "<br>所在版面：<a href=" & MyHomeUrl
+			if LMT_EnableRewrite = 0 then
+				response.write "b/b.asp?b=" & GetData(1,N)
+			else
+				response.write "b/forum-" & GetData(1,N) & "-1.html"
+			end if
+			response.write ">" & HtmlEncode(KillHTMLLabel(GetData(9,N))) & "</a>" & VbCrLf
 			Response.Write "<br>帖子作者：" & HtmlEncode(GetData(6,N)) & VbCrLf
 			Response.Write "<br>内容提要："
 			If isNull(GetData(3,N)) Then GetData(3,N) = ""

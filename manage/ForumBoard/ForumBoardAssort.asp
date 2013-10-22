@@ -70,6 +70,7 @@ Function Join
 					Response.Write "<div class=alert>插入出错：" & GBL_CHK_TempStr & "</div>" & VbCrLf
 					DisplayJoinForm
 				Else
+					UpdateCacheData("data_goodassort.asp")
 					Response.Write "<div class=alertdone>成功操作!</div>" & VbCrLf
 				End If
 			End If
@@ -188,9 +189,10 @@ Function CheckFormData
 	If LMT_OrderID < 0 Then LMT_OrderID = 0
 
 	If isNumeric(LMT_BoardID) = 0 or LMT_BoardID = "" Then
-		GBL_CHK_TempStr = "请选择正确的所属版面。<br>" & VbCrLf
-		CheckFormData = 0
-		Exit Function
+		LMT_BoardID = 0
+		'GBL_CHK_TempStr = "请选择正确的所属版面。<br>" & VbCrLf
+		'CheckFormData = 0
+		'Exit Function
 	End If
 	
 	LMT_BoardID = Fix(cCur(LMT_BoardID))
@@ -201,8 +203,9 @@ Function CheckFormData
 	End If
 
 	If isArray(Temp) = False Then
-		GBL_CHK_TempStr = "所属版面不存在，请确定是否已经正确选择!<br>" & VbCrLf
-		CheckFormData = 0
+		'GBL_CHK_TempStr = "所属版面不存在，请确定是否已经正确选择!<br>" & VbCrLf
+		'CheckFormData = 0
+		LMT_BoardID = 0
 	End If
 
 	If Len(LMT_AssortName) > 255 or LMT_AssortName = "" Then
@@ -298,7 +301,7 @@ Function Manage
 			document.write("<tr><td class=tdbox colspan=6><b>版面：<a href=<%=DEF_BBS_HomeUrl%>b/b.asp?B=" + BoardID + ">" + BoardName + "</a></td></tr>");
 		}
 		lastID=ID;
-		document.write("<tr class=TBBG9 bgcolor=<%=DEF_BBS_LightestColor%>><td class=tdbox>" + ID + "</td>");
+		document.write("<tr class=TBBG9><td class=tdbox>" + ID + "</td>");
 		document.write("<td class=tdbox><a href=ForumBoardAssort.asp?action=Modify&ID=" + ID + ">" + AssortName + "</a></td>");
 		document.write("<td class=tdbox>" + GoodNum + "</td><td class=tdbox><a href=<%=DEF_BBS_HomeUrl%>b/b.asp?B=" + BoardID + ">" + BoardName + "</a></td>");
 		document.write("<td class=tdbox>" + OrderID + "</td>");
@@ -349,6 +352,7 @@ Function Delete
 		If DeleteTopicAssort(ID) > 0 Then
 			Response.Write "<p><font color=008800 class=greenfont><b>已经成功删除编号为" & ID & "的版面专区！</b></font></p>"
 		Else
+			UpdateCacheData("data_goodassort.asp")
 			Response.Write "<p><font color=ff0000 class=redfont><b>" & GBL_CHK_TempStr & "</b></font></p>"
 		End If
 	Else
@@ -407,4 +411,72 @@ Sub ReloadTopicAssort(BoardID)
 	Rs.Close
 	Set Rs = Nothing
 
-End Sub%>
+End Sub
+
+
+Function UpdateCacheData(savefile)
+
+		Dim Rs,GetData,Num
+		Set Rs = LDExeCute("select T1.ID,T1.BoardID,T1.AssortName,T2.BoardName from LeadBBS_GoodAssort as T1 left join LeadBBS_Boards as T2 on T1.BoardID=T2.BoardID Order by T1.BoardID,T1.OrderID",0)
+	
+		If Not Rs.Eof Then
+			GetData = Rs.GetRows(-1)
+			Num = Ubound(GetData,2)
+		Else
+			Num = -1
+		End If
+		Rs.Close
+		Set Rs = Nothing
+		
+		'on error resume next
+		Dim TempStr
+		TempStr = ""
+	
+		Dim N,WriteStr
+		TempStr = TempStr & "["
+	
+		If Num = -1 Then
+		Else
+			dim oldBD,boardid
+			oldbd = -1
+			For N = 0 to Num
+				boardid = ccur(getdata(1,n))
+				if oldbd <> boardid then
+					oldbd = boardid
+					If N = 0 Then
+						TempStr = TempStr & "{" & VbCrLf
+					Else
+						TempStr = TempStr & ",{" & VbCrLf
+					End If
+					TempStr = TempStr & "	""id"":0" & "," & VbCrLf
+					If boardid=0 then getdata(3,n) = "总专题"
+					TempStr = TempStr & "	""text"":""所属版块:" & htmlencode(KillHTMLLabel(getdata(3,n))) & """" & VbCrLf & "}"
+				end if
+				WriteStr = ""
+				WriteStr = WriteStr & KillHTMLLabel(GetData(2,N))
+				If StrLength(WriteStr) > 21 Then
+					WriteStr = LeftTrue(WriteStr,18) & "..."
+				End If	
+				
+				TempStr = TempStr & ",{" & VbCrLf
+				TempStr = TempStr & "	""id"":" & GetData(0,N) & "," & VbCrLf
+				TempStr = TempStr & "	""text"":""" & GetData(0,N) & "." & htmlencode(WriteStr) & """" & VbCrLf & "}"
+				'GBL_LowClassString = ""
+				'GBL_LoopN = 0
+				'GetLowClassString_Json GetData(0,n)
+				'If GBL_LowClassString <> "" Then TempStr = TempStr & GBL_LowClassString				
+			Next
+		End If
+	
+		TempStr = DEF_pageHeader & TempStr & "]"
+		
+		ADODB_SaveToFile TempStr,DEF_BBS_HomeUrl & "inc/IncHtm/" & savefile & ""
+		If GBL_CHK_TempStr = "" Then
+			Response.Write "<br><span class=cms_ok>2.成功更新文件../../inc/IncHtm/" & savefile & "！</span>"
+		Else
+			%><p><%=GBL_CHK_TempStr%><br>服务器不支持在线写入文件功能，请使用FTP等功能，<br>将<span Class=cms_error>inc/IncHtm/<%=savefile%></span>文件替换成下框中内容(注意备份)<p>
+			<textarea name="fileContent" cols="80" rows="20" class=fmtxtra><%=Server.htmlencode(TempStr)%></textarea><%
+			GBL_CHK_TempStr = ""
+		End If
+	
+End Function%>

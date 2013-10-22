@@ -7,6 +7,7 @@
 <!-- #include file=inc/Editor_Fun.asp -->
 <!-- #include file=../inc/Upload_Fun.asp -->
 <!-- #include file=inc/upload1_fun.asp -->
+<!-- #include file=inc/Edit_BoardInfo_Fun.asp -->
 <%
 Const LMTDEF_MinAnnounceLength = 2 '编辑提交的帖子内容需要最少字数
 Const LMT_BuyAnnounceMaxPoints = 9 '购买帖消耗的最大积分
@@ -24,27 +25,17 @@ Dim Form_VoteType,Form_VoteItem,Form_Vote_ExpireDay,VoteFlag,Form_VoteType_Old
 VoteFlag = 0
 
 Dim LMT_TopicName,LMT_TopicNameNoHTML,LMT_TopicTitleStyle,LMT_RootIDBak,LMT_TopicNameNoHTML_Temp
-Dim Upd_SpendFlag,Upd_ErrInfo,Form_UpClass,Form_UpFlag,Form_Submitflag,Form_ForumNumber
+Dim Upd_ErrInfo,Form_UpClass,Form_UpFlag,Form_Submitflag,Form_ForumNumber
 
 Form_HTMLFlag = 2
 Dim LMT_RootMaxID,LMT_RootMinID
 LMT_RootMaxID = 0
 LMT_RootMinID = 0
 
-const PageSplitNum = 10
+Dim LMT_EnableUpload
 
-Dim LMT_DefaultEdit,LMT_EnableUpload
-LMT_DefaultEdit = DEF_UbbDefaultEdit
-
-Dim LMT_MaxTextLength,SupervisorFlag,VoteGetData,VoteNumber
+Dim SupervisorFlag,VoteGetData,VoteNumber
 SupervisorFlag = CheckSupervisorUserName
-If SupervisorFlag = 0 Then
-	LMT_MaxTextLength = DEF_MaxTextLength
-Else
-	LMT_MaxTextLength = DEF_MaxTextLength * 4
-End If
-
-EditFlag = 1
 
 Function DisplayAnnounceForm
 
@@ -140,7 +131,6 @@ End If
 				Response.Write "编辑帖子："  & LMT_TopicNameNoHTML_Temp%></div></td>
 		</tr>
 		</table>
-		<!-- #include file=inc/post_layer.asp -->
 		<%If LMT_EnableUpload = 0 Then %>
 		<form action=EditAnnounce.asp method=post id=LeadBBSFm name=LeadBBSFm onSubmit="submitonce(this);return ValidationPassed;">
 		<%Else%>
@@ -277,7 +267,7 @@ End If
 				<input name=Form_FaceIcon class=fmchkbox type=radio value=16<%If Form_FaceIcon=16 Then Response.WRite " CHECKED"%>><img src="../images/<%=GBL_DefineImage%>bf/FACE16.GIF" class=absmiddle>
 			</td>
 		</tr><%
-		DisplayLeadBBSEditor1
+		call DisplayLeadBBSEditor1(Form_HTMLFlag,Form_Content,0,1)
 		If Form_ParentID=0 and Form_TopicType <> 80 Then%>
 		<tr>
 			<td width="<%=DEF_BBS_LeftTDWidth%>" class=tdleft>加密本帖功能</td>
@@ -1401,6 +1391,19 @@ Sub Main
 	Get_PublicValue
 	initDatabase
 	CheckisBoardMaster
+	
+	Select Case Form_EditAnnounceID
+		Case -1:
+			BBS_SiteHead DEF_SiteNameString & " - " & KillHTMLLabel(GBL_Board_BoardName) & " - 设置版块公告",GBL_board_ID,"<span class=navigate_string_step>设置版块公告</span>"
+			Boards_Body_Head("")
+			Edit_BoardInfo
+			If Form_UpFlag = 1 Then Set Form_UpClass = Nothing
+			closeDataBase
+			Boards_Body_Bottom
+			SiteBottom
+			Exit Sub
+	End Select
+	
 	GetTopicInfo
 	
 	If GetBinarybit(GBL_Board_BoardLimit,16) = 1 Then
@@ -1452,6 +1455,7 @@ Sub Main
 	If GBL_CHK_TempStr <> "" Then
 		Global_ErrMsg GBL_CHK_TempStr
 	Else
+		EditFlag = 1
 		GetAncUploaInfo
 		If Form_Submitflag <> "slzOowl_kdO8m610" Then
 			DisplayAnnounceForm

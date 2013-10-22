@@ -1,5 +1,5 @@
 body{color:black;font: 12px arial; background-color:#f3f7fa;text-align: center;}
-body{padding: 0px;margin: 0px;overflow-y:scroll;}
+body{padding: 0px;margin: 0px;overflow-y:scroll;_overflow-y:auto;*overflow-y:auto;}
 p { margin: 0px 0px 5px 0px;line-height:1.5em;}
 textarea{font-size:9pt;overflow-y:auto;width: 95%; word-break: break-all;word-wrap:break-word;}
 input{font-size:9pt;}
@@ -7,6 +7,7 @@ input:focus, input:hover { background-color: #f1f1f1; }
 select{font-size:9pt;height:20px;color:black;background-color:#f5fafe}
 table{text-align: left;}
 font{line-height:1.5em;}
+blockquote{margin:20px;}
 .fminpt{border-right:#aaaaaa 1px solid;border-top:#aaaaaa 1px solid;font-size:9pt;border-left:#aaaaaa 1px solid;border-bottom:#aaaaaa 1px solid;height:17px;line-height:17px;vertical-align: middle;}
 .input_1{width:40px;}
 .input_2{width:100px;}
@@ -249,7 +250,7 @@ background: url(../images/temp/banner17.gif) no-repeat;}
 .tdcontent a.page {color:#0055aa;font:12px Verdana, Helvetica, sans-serif;}
 .tdcontent em {margin-top:1px;font-family:Arial,sans-serif;font-style:normal;font-size:10px;color:#666;}
 .tdcontent .postuser {color:#0055aa;}
-.tdcontent .lastuser {color:#0055aa;}
+.tdcontent .lastuser {color:#888;}
 .tdcontent .page {color:#0055aa;font:12px sans-serif}
 
 .tbhead td{background-color:#effaff;padding-bottom:1px;padding-top:1px;}/*padding for Mozilla*/
@@ -675,7 +676,7 @@ border:0px solid #fff;background-color:#fff;
 .forum_options_sim
 {cursor:pointer; background: url(../images/style/extend/01001/forum_options.gif) no-repeat 15px -92px;}
 
-.table_options .hits{text-align:center;}
+.table_options .hits{text-align:left;}
 .table_options_sim .hits{display:none;}
 .table_options_sim .reply{display:none;}
 .boardnavlist_sider{overflow:hidden;_float:right;}
@@ -683,3 +684,23 @@ border:0px solid #fff;background-color:#fff;
 .post_master {background: url(../../images/style/extend/01001/post_master.gif) no-repeat left top;}
 .content_hidden {border:2px dotted gray;padding:12px;float:left;clear:both;border-radius: 7px;}
 .content_hidden .grayfont{display:none;}
+
+/*ad*/
+#ad_hometop{position:relative;left:-3px;padding:24px 0px 0px 0px;display:none;}
+#ad_homebottom{position:relative;left:-3px;padding:12px 0px;text-align:center;display:none;}
+
+#ad_boardtop{position:relative;left:-3px;padding:12px 0px 0px 0px;display:none;}
+#ad_boardbottom{position:relative;left:-3px;padding:12px 0px;text-align:center;display:none;}
+
+#ad_topictop{position:relative;left:-3px;padding:12px 0px 0px 0px;display:none;}
+#ad_topicbottom{position:relative;left:-3px;padding:12px 0px;text-align:center;display:none;}
+
+
+.bindpost{margin-top:10px;}
+.bindpost span{float:left;margin-right:12px;}
+.bindpost_1{background: url("../../images/app/ico_apps.png") no-repeat -64px -32px;width:20px;height:20px;display:block;float:left;}
+.bindpost_1_weibo{background: url("../../images/app/ico_apps.png") no-repeat -32px -32px;width:20px;height:20px;display:block;float:left;}
+.bindpost_1_dis{background: url("../../images/app/ico_apps.png") no-repeat -64px -192px;width:20px;height:20px;display:block;float:left;}
+.bindpost .item{position:relative;width:26px;height:26px;}
+.bindpost .select{background: url("../../images/app/ico_selected.png") no-repeat;width:12px;height:12px;position:absolute;right:6px;bottom:6px;}
+.inline{display:inline-block;text-align:center;}

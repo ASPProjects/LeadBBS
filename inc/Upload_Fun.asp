@@ -12,6 +12,28 @@ GBL_Height = 65
 
 Const EnableLeadBBSInfo = 0
 
+function GetPicInfo(LoadFile,typeflag)
+
+	if checkFiles(LoadFile) = 0 then
+		GetPicInfo = 0
+		Exit Function
+	End If
+	Dim MyObj
+	Set MyObj = Server.CreateObject("Persits.Jpeg")
+	MyObj.Open(LoadFile)
+	if err Then
+		GetPicInfo = 0
+	else
+		if typeflag = "height" then
+			GetPicInfo = MyObj.Height
+		else
+			GetPicInfo = MyObj.Width
+		end if
+	End If
+	Set MyObj = Nothing
+
+end function
+
 Function SaveSmallPic(LoadFile,SaveFile,SaveW,SaveH,drawFlag)
 
 	'On Error Resume Next
@@ -304,6 +326,28 @@ Function DeleteFiles(path)
 		DeleteFiles = 1
 	Else
 		DeleteFiles = 0
+	End If
+	Set fs = Nothing
+
+End Function
+
+
+Function MoveFiles(path,path2)
+
+	If DEF_FSOString = "" Then Exit Function
+	'on error resume next
+	Dim fs
+	Set fs = Server.CreateObject(DEF_FSOString)
+	If err <> 0 Then
+		Err.Clear
+		Response.Write "<p>服务器不支持FSO，硬盘文件未删除．</p>"
+		Exit Function
+	End If
+	If fs.FileExists(path) Then
+		fs.MoveFile path,path2
+		MoveFiles = 1
+	Else
+		MoveFiles = 0
 	End If
 	Set fs = Nothing
 

@@ -268,6 +268,7 @@ Class hubblesearch_class
 		Set hubbleObj = CreateObject("leadbbs.forhubble")
 		GetData = hubbleObj.GetData(DEF_HubbleDatabase,sql,keywords,"-1,1,2",DEF_HubbleTable,DEF_HubbleHightlightColumn,256,outstr)
 		set hubbleObj = Nothing
+		GBL_DBNum = GBL_DBNum + 1
 		recNum = Ubound(GetData)
 		
 		if recNum < 0 then

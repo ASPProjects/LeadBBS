@@ -6,6 +6,7 @@
 <!-- #include file=../inc/Limit_fun.asp -->
 <!-- #include file=inc/UserTopic.asp -->
 <!-- #include file=../Search/inc/Upload_fun.asp -->
+<!-- #include file=inc/Bind_Fun.asp -->
 <%
 DEF_BBS_HomeUrl = "../"
 Dim GBL_ID,GBL_Name,GBL_NoneLimitFlag
@@ -21,7 +22,7 @@ Sub Main
 	GBL_ID = cCur(GBL_ID)
 	If GBL_ID =  GBL_UserID Then GBL_Name = GBL_CHK_User
 	
-	Evol = Left(Request.QueryString("Evol"),4)
+	Evol = Left(Request.QueryString("Evol"),6)
 	
 	initDatabase
 	
@@ -35,6 +36,10 @@ Sub Main
 		Case "f": EvolString = "好友信息"
 		Case "uf": EvolString = "好友信息"
 		Case "bag": EvolString = "收藏夹"
+		case "bind": EvolString = "绑定网站"
+		case "unbind": 
+			Unbind
+			exit sub
 		Case Else: EvolString = "查看用户资料"
 				Evol = "A"
 	End Select
@@ -74,6 +79,7 @@ Sub Main
 			Case "f": DisplayFriend
 			Case "uf": DisplayFriend
 			Case "bag": DisplayFavorite
+			Case "bind": DisplayBind
 			Case Else: If LookUserInfo = 0 Then Response.Write "<div class='alert redfont'>" & GBL_CHK_TempStr & "</div>"
 		End Select
 	End If

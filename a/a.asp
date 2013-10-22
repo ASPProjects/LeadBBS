@@ -7,11 +7,12 @@
 <!-- #include file=../inc/AD_Fun.asp -->
 <!-- #include file=../inc/UBBCode_Setup.asp -->
 <%
-Const LMT_RefreshEnable = 0 '用户重复浏览帖子是否计算浏览量
+Const LMT_RefreshEnable = 1 '用户重复浏览帖子是否计算浏览量
 Const LMT_ViewTopicOpinion = 1 '重复直接显示主题评价列表
 Const LMTDEF_RepostMsg = 0 '回复帖子是否默认短消息通知帖主,0．默认不通知 1.回复全部通知(注意与回帖(a2.asp文件)设置保持一直)
-Const LMTDEF_ConvetType = 0 'ubb编码转换方式：0,客户端JS转换,1.leadbbs dll组件服务端转换 2.vbscript服务端转换
-Const LMTDEF_ShareID = "<a class=""bshareDiv"" href=""http://www.bshare.cn/share""></a><script type=""text/javascript"" charset=""utf-8"" src=""http://static.bshare.cn/b/buttonLite.js#uuid=0e896bee-a954-4993-a6e5-f56844e9c9fc&style=2""></script>" '可以填写各站或自行编写类型的分享代码(HTML格式，注意手工删除换行符),保持为空则关闭分享代码;
+Const LMTDEF_ShareID = "<div id=""bdshare"" class=""bdshare_t bds_tools get-codes-bdshare""><span class=""bds_more"">分享到：</span><a class=""bds_qzone""></a><a class=""bds_tsina""></a><a class=""bds_tqq""></a><a class=""bds_renren""></a><a class=""bds_t163""></a><a class=""shareCount""></a></div><script type=""text/javascript"" id=""bdshare_js"" data=""type=tools&amp;uid=0"" ></script><script type=""text/javascript"" id=""bdshell_js""></script><script type=""text/javascript"">document.getElementById(""bdshell_js"").src = ""http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion="" + Math.ceil(new Date()/3600000)</script>" '可以填写各站或自行编写类型的分享代码(HTML格式，注意手工删除换行符),保持为空则关闭分享代码;
+
+dim LMTDEF_ConvetType : LMTDEF_ConvetType = GetBinarybit(DEF_Sideparameter,7) 'ubb编码转换方式：0,客户端JS转换,1.leadbbs dll组件服务端转换 2.vbscript服务端转换
 
 Dim LMTDEF_ShareID_Exist
 LMTDEF_ShareID_Exist = ""
@@ -33,9 +34,6 @@ Dim A_BoardUrl,A_BoardStr
 
 Dim R_ID,R_NDatetime
 R_ID = 0
-
-Dim LMT_EnableRewrite
-LMT_EnableRewrite = GetBinarybit(DEF_Sideparameter,16)
 
 Function DisplayAnnounceForm
 
@@ -95,7 +93,7 @@ Function DisplayAnnounceForm
 
 	function edt_import()
 	{
-		$import("inc/leadedit.js?ver=20080729.32","js","",function(){
+		$import("inc/leadedit.js?ver=20080729.33","js","",function(){
 			edt_heigh = 110;
 			getAJAX("a2.asp","ol=1","$id('leadeditor').innerHTML=tmp;edt_import_init();",1);
 			}
@@ -1407,7 +1405,7 @@ SupervisorFlag = CheckSupervisorUserName
 Temp = LCase(Request.ServerVariables("server_name"))
 If inStr(Temp,".") <> inStrRev(Temp,".") Then Temp = Mid(Temp,inStr(Temp,".") + 1)
 %>
-<script src="inc/leadcode.js?ver=20080728.225" type="text/javascript"></script>
+<script src="inc/leadcode.js<%=DEF_Jer%>" type="text/javascript"></script>
 <script type="text/javascript">
 var GBL_domain="|<%=DEF_SafeUrl%>|";
 var DEF_DownKey="<%=UrlEncode(DEF_DownKey)%>";
@@ -1774,6 +1772,9 @@ Sub Main
 	Else
 		BBS_SiteHead DEF_SiteNameString,0,GetBoardNavigateString & "<span class=""navigate_string_step"">查看帖子</span>"
 	End If
+	%><div class="area">
+	<div id="ad_topictop"></div></div>
+	<%
 
 	Boards_Body_Head("")
 	CheckAccessLimit
@@ -1873,13 +1874,16 @@ Sub Main
 		
 	<script type="text/javascript">
 	var sharehtml = " <%=replace(replace(replace(LMTDEF_ShareID,"\","\\"),"""","\"""),"script","s\x63ript")%>";
-	$id('shareHTML').innerHTML = sharehtml;
-	js_Reload($id('shareHTML'));
-	
+	$('#shareHTML').html(sharehtml);
 	</script>
 	<%
 	'share code end
 	End If
+	%>
+	<div class="clear"></div>
+	<div class="area">
+	<div id="ad_topicbottom"></div></div>
+	<%
 	SiteBottom
 
 End Sub

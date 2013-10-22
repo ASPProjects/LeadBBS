@@ -121,9 +121,9 @@ Function PersonalInfoManage
 	</tr>
 	</table>
 	<br>
-	<table border=0 cellpadding=5 cellspacing=1 width=<%=DEF_BBS_ScreenWidth%> bgcolor="<%=DEF_BBS_Color%>" style="WORD-BREAK: break-all;" class=TBBG1 align=center>
+	<table border=0 cellpadding=5 cellspacing=1 width=<%=DEF_BBS_ScreenWidth%> style="WORD-BREAK: break-all;" class=TBBG1 align=center>
 	
-	<tr bgcolor="<%=DEF_BBS_LightestColor%>" class=TBBG9> 
+	<tr class=TBBG9> 
 		<td class=TBBG1>
 			<%Response.Write "<font color=gray class=grayfont>±‡∫≈£∫</font>" & Rs(0) & " &nbsp;"
 			Response.Write "<font color=gray class=grayfont>∑¢ÀÕ»À£∫</font><a href=LookUserinfo.asp?name=" & urlencode(Rs(1)) & " target=_blank>" & htmlencode(Rs(1)) & "</a> &nbsp;"
@@ -131,7 +131,7 @@ Function PersonalInfoManage
 			If SuperFlag = 1 Then Response.Write "<font color=gray class=grayfont>IP£∫</font>" & Rs(5)%>
 		</td>
 	</tr>
-	<tr bgcolor="<%=DEF_BBS_LightestColor%>" class=TBBG9> 
+	<tr class=TBBG9> 
 		<td height=24 valign=top>
 			<table border="0" cellspacing="0" cellpadding="0">
 			<tr> 

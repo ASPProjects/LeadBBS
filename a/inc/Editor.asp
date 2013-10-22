@@ -1,6 +1,11 @@
 <%
+
 Sub Editor_View(Edt_MiniMode,Form_Content)
 %>
+<script>
+var editFile_dir = "<%=DEF_BBS_HomeUrl%>a/";
+</script>
+<!-- #include file=post_layer.asp -->
 <table border=0 cellpadding=0 cellspacing=0 width="500"><tr><td>
 <table border=0 cellpadding=0 cellspacing=0 width="100%">
 <tr><td>
@@ -67,7 +72,7 @@ Sub Editor_View(Edt_MiniMode,Form_Content)
 <td width=23 class=ico><a href=#ic title=引用 onclick="insert('quote');" class="a_pic" style="background-position:0px -550px;"></a></td>
 <td width=23 class=ico><a href=#ic title=代码 onclick="insert('code');" class="a_pic" style="background-position:0px -220px;"></a></td>
 <td><div class="a_pic" style="background-position:0px -638px;width:10px;height:16px;"></div></td><td>
-<td width=23 class=ico><a href=#ic title=插入特殊字符 onclick="editor_view(this,'editor_symbol','symbol.asp','symbol.js');" class="a_pic" style="background-position:0px -374px;"></a></td>
+<td width=23 class=ico><a href=#ic title=插入特殊字符 onclick="editor_view(this,'editor_symbol','symbol.asp?id=56','symbol.js?id=31');" class="a_pic" style="background-position:0px -374px;"></a></td>
 <td width=23 class=ico><a href=#ic title=插入分隔线 onclick="addcontent(0,'hr');" class="a_pic" style="background-position:0px 0px"></a></td>
 </td></tr></table></td></tr></table>
 <table border=0 cellpadding=0 cellspacing=0 width=100%>

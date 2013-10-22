@@ -1,8 +1,10 @@
 <!-- #include file=../../inc/BBSsetup.asp -->
 <!-- #include file=../../inc/Board_popfun.asp -->
 <!-- #include file=../inc/bbsmanage_Fun.asp -->
+<!-- #include file=inc/admanage_Fun.asp -->
 <%
 DEF_BBS_HomeUrl = "../../"
+Const MaxLinkNum = 200
 Dim GBL_ID
 initDatabase
 GBL_CHK_TempStr = ""
@@ -10,7 +12,7 @@ GBL_ID = checkSupervisorPass
 
 Manage_sitehead DEF_SiteNameString & " - 管理员",""
 frame_TopInfo
-DisplayUserNavigate("网站信息和扩展服务")
+DisplayUserNavigate("扩展功能")
 
 Dim GBL_FSOString
 GBL_FSOString = DEF_FSOString
@@ -44,6 +46,8 @@ Sub Main
 			MoreSV_Main
 		Case "Side":
 			Side_Main
+		Case "admanage":
+			admanage_Main
 		Case Else:
 			SiteInfo
 			%>
@@ -369,7 +373,7 @@ Sub Side_Main
 	
 	Dim Side_Data,Dn
 	Dim Rs
-	Set Rs = LDExeCute("Select * from LeadBBS_Setup where RID=01000 order by ClassNum",0)
+	Set Rs = LDExeCute("Select ID,RID,ValueStr,ClassNum,saveData from LeadBBS_Setup where RID=01000 order by ClassNum ASC",0)
 	If Not Rs.Eof Then
 		Side_Data = Rs.GetRows(-1)
 		Dn = Ubound(Side_Data,2)
@@ -380,13 +384,16 @@ Sub Side_Main
 	Set Rs = Nothing
 	
 	Dim Sn,m
-	Dim CheckFlag,Title,RecordCount,OtherInfo,Sort,Tmp
+	Dim CheckFlag,Title,RecordCount,OtherInfo,Sort,Tmp,SaveData
 	%>
-	<p>
-	<b>首页边栏调用设置</b>
-	</p>
-	<form action="SiteInfo.asp?action=Side" method="post" name="LeadBBSFm" onSubmit="submit_disable(this);">
+	<script src="<%=DEF_BBS_HomeUrl%>inc/js/jquery.easyui.js"></script>
+	<div id="testinfo"></div>
+	<div id=test_html style="display:none;"></div>
+	<h2>
+	首页边栏调用设置(可拖动标题排序)</h2>
+	<form action="SiteInfo.asp?action=Side" method="post" name="LeadBBSFm" onSubmit="return checksubmit(this);"">
 	<input type="hidden" value="1" name="subside">
+	<div id="home_side_form">
 	<%
 	For Sn = 0 To Ubound(Side_Select,1)
 		CheckFlag = 0
@@ -409,31 +416,221 @@ Sub Side_Main
 			End If
 		Next
 	%>
-		<table border=0 cellpadding="0" class="blanktable">
-		<tr>
-		<td>
+		<div class="sortitems">
 		<input type="checkbox" class=fmchkbox name="Side_Select<%=Sn%>" value="1"<%If CheckFlag = 1 Then
 				Response.Write " checked>"
 			Else
 				Response.Write ">"
-			End If%><%=Side_Select(Sn)%>
-		</td><td>
+			End If%><span class="moveitem"><%=Side_Select(Sn)%></span>
+		
 		标题 <input class='fminpt input_3' maxlength=50 name=Title<%=Sn%> value="<%=htmlencode(Title)%>">
-		</td><td>
+		
 		调用数量 <input name=RecordCount<%=Sn%> value="<%=RecordCount%>" maxLength="2" class="fminpt input_1">
-		</td><td>
-		顺序 <input name=Sort<%=Sn%> value="<%=Sort%>" maxLength="2" class="fminpt input_1">
-		</td></tr>
+		
+		顺序 <input name=Sort<%=Sn%> onchange="$(this).next().html(this.value);sort_start();" value="<%=Sort%>" maxLength="2" class="sortinput fminpt input_1">
+		<span style="display:none;" class="sorttxt"><%=Sort%></span>
+		
 		
 		<%If Sn = 2 Then%>
-		<tr><td> </td><td colspan="3">
+		<br />
 		专区编号 <input name=OtherInfo<%=Sn%> value="<%=OtherInfo%>" maxLength="12" class="fminpt input_2">
 		<a href="../ForumBoard/ForumBoardAssort.asp">详细编号至版面专区管理查看</a>
-		</td></tr>
+		
 		<%End If%>
-		</table>
+		</div>
 	<%
 	Next
+	
+	'输出首页侧栏自定义代码 999开头为自定义类
+	Sn = Ubound(Side_Select,1)
+	Dim MaxSort : MaxSort = 0
+	For m = 0 To dn
+		CheckFlag = 0
+		RecordCount = 10
+		If Sn = 3 Then RecordCount = 4 '最新图片默记录条数
+		Title = "首页侧栏自定义代码"
+		OtherInfo = ""
+		Sort = 0
+		If inStr("|" & Side_Data(2,m),"|999|") Then
+			Sn = Sn + 1
+			CheckFlag = 1
+			Tmp = Split(Trim(Side_Data(2,m)&""),"|")
+			If Ubound(Tmp,1) >= 2 Then
+				Title = Tmp(1)
+				RecordCount = Tmp(2)
+			End If
+			If Ubound(Tmp,1) >= 3 Then OtherInfo = Tmp(3)
+			Sort = Side_Data(3,m)
+			If MaxSort < Sort Then MaxSort = Sort
+			SaveData = Side_Data(4,m) & ""
+		%>
+			<div class="sortitems">
+			<input type="hidden" name="trueID<%=Sn%>" value="<%=Side_Data(0,m)%>">
+			<input type="checkbox" class=fmchkbox name="Side_Select<%=Sn%>" value="1"<%If CheckFlag = 1 Then
+					Response.Write " checked>"
+				Else
+					Response.Write ">"
+				End If%><span class="moveitem">自定义代码<%=Sn%></span>
+			
+			标题 <input class='fminpt input_3' maxlength=50 name=Title<%=Sn%> value="<%=htmlencode(Title)%>">
+			
+			<span style="display:none;">调用数量 <input name=RecordCount<%=Sn%> value="<%=RecordCount%>" maxLength="2" class="fminpt input_1"></span>
+			
+			顺序 <input name=Sort<%=Sn%> value="<%=Sort%>" onchange="$(this).next().html(this.value);sort_start();" maxLength="2" class="sortinput fminpt input_1">
+			<span style="display:none;" class="sorttxt"><%=Sort%></span>
+			<br />
+			请输入代码，允许使用HTML和JavaScript 
+			<textarea cols="80" name="SaveData<%=Sn%>" rows="6" tabindex="51" class="fmtxtra"><%If SaveData <> "" Then Response.Write VbCrLf & htmlEncode(SaveData)%></textarea>
+			</div>
+		<%
+		end if
+	Next
+	%>
+	</div>
+
+	<script>
+	var indicator = $('<div class="indicator">>></div>').appendTo('body');
+	function initsort()
+	{
+			initsorted = 1;
+			$('.sortitems').draggable({
+				revert:true,
+				deltaX:0,
+				deltaY:0,
+				handle:'.moveitem',
+			}).droppable({
+				onDragOver:function(e,source){
+					indicator.css({
+						display:'block',
+						left:$(this).offset().left-10,
+						top:$(this).offset().top+$(this).outerHeight()-5
+					});
+				},
+				onDragLeave:function(e,source){
+					indicator.hide();
+				},
+				onDrop:function(e,source){
+					$(source).insertAfter(this);
+					indicator.hide();
+					sort_byorder();
+				}
+			});
+	}
+		$(function(){
+			initsort();
+		});
+	
+	
+	(function($) {
+	$.fn.sorted = function(customOptions) {
+
+		var options = {
+			reversed: false,
+			by: function(a) { return a.text(); }
+		};
+
+		$.extend(options, customOptions);
+
+		$data = $(this);
+		arr = $data.get();
+		arr.sort(function(a, b) {
+			var valA = options.by($(a));
+			var valB = options.by($(b));
+			if (options.reversed) {
+				return (valA < valB) ? 1 : (valA > valB) ? -1 : 0;				
+			} else {		
+				return (valA < valB) ? -1 : (valA > valB) ? 1 : 0;	
+			}
+		});
+		
+		var upDom = $(this).parent();
+		$(upDom).empty();
+		for(var n=0;n<arr.length;n++)
+		{		
+		$(arr[n]).find("input.sortinput").val(n);
+		$(arr[n]).find("span.sorttxt").html(n);
+		$(upDom).append($(arr[n]));}
+		initsort();
+		return $(arr);
+	};
+})(jQuery);
+
+function sort_start()
+{
+	var arr=$("#home_side_form .sortitems").sorted(
+		{
+			by: function(v) {
+				return parseInt(v.find('span.sorttxt').html());
+			}
+		}
+	);
+}
+
+function sort_byorder()
+{
+	var arr=$("#home_side_form .sortitems");
+	for(var n=0;n<arr.length;n++)
+	{		
+	$(arr[n]).find("input.sortinput").val(n);
+	$(arr[n]).find("span.sorttxt").html(n);}
+}
+
+function sort_start()
+{
+	var arr=$("#home_side_form .sortitems").sorted(
+		{
+			by: function(v) {
+				return parseInt(v.find('span.sorttxt').html());
+			}
+		}
+	);
+}
+sort_start();
+
+	function checksubmit(f)
+	{
+		var textarea = $('textarea').length;
+		for(var n=0;n<textarea;n++)
+		{
+			if($('textarea').eq(n))
+			{
+				$("#test_html").html($('textarea').eq(n).val());
+				$('textarea').eq(n).val($("#test_html").html());
+				if($('textarea').eq(n).val().length>10240)
+				{alert("错误：自定义代码"+(n+5)+" 长度超过了10240.");return false;}
+			}
+		}
+		return true;
+	}
+	</script>
+<script language=javascript>
+var maxNumber=<%=MaxLinkNum%>;
+var Number=<%=Sn%>;
+var MaxSort=<%=MaxSort%>;
+
+function additem()
+{
+	Number+=1;
+	if(Number>maxNumber)
+	{
+		alert("已经达到最大数目，不能再增加!");
+	}
+	else
+	{
+		
+		var tmp="<table border=0 cellpadding=0 class=blanktable><tr><td><input type=hidden name=trueID" + Number + " value=999999>";
+		tmp+="<input type=checkbox class=fmchkbox name=Side_Select" + Number + " value=1 checked><span class='moveitem'>自定义代码" + Number + "</span></td><td>";
+		tmp+="标题 <input class='fminpt input_3' maxlength=50 name=Title" + Number + " value=''></td><td>";
+		tmp+="<span style='display:none;'>调用数量 <input name=RecordCount" + Number + " value='' maxLength=2 class='fminpt input_1'></span></td><td>";
+		tmp+="顺序 <input name=Sort" + Number + " onchange='$(this).next().html(this.value);sort_start();' value='"+(MaxSort)+"' maxLength=2 class='sortinput fminpt input_1'><span style='display:none;' class='sorttxt'>"+(MaxSort)+"</span></td></tr><tr><td> </td><td colspan=3>";
+		tmp+="请输入代码，允许使用HTML和JavaScript <textarea cols=80 name=SaveData" + Number + " rows=6 tabindex=51 class=fmtxtra></textarea></td></tr></table>";
+		$id('home_side_form').innerHTML+=tmp;
+		//this.scroll(0, 65000);
+	}
+}
+</script>
+<a href=javascript:; onclick="additem();" class=manage_submit>点击添加自定义代码(可以插入广告或是任意HTML代码)</a>
+	<%
 	
 
 	Side_Select = Array("子版块","版块热帖","版块精华")
@@ -528,15 +725,18 @@ End Sub
 Sub Side_UpdateFormData
 
 	Dim Sn,m,Rs
-	Dim CheckFlag,Title,RecordCount,OtherInfo,Sort,Tmp
-	For Sn = 0 to 4
+	Dim CheckFlag,Title,RecordCount,OtherInfo,Sort,Tmp,SaveData,trueID
+	For Sn = 0 to MaxLinkNum
 		CheckFlag = Request.Form("Side_Select" & Sn)
 		Title = Request.Form("Title" & Sn)
-		RecordCount = Request.Form("RecordCount" & Sn)
+		RecordCount = toNum(Request.Form("RecordCount" & Sn),0)
 		Sort = Request.Form("Sort" & Sn)
 		OtherInfo = Request.Form("OtherInfo" & Sn)
+		SaveData = Request.Form("SaveData" & Sn)
+		trueID = toNum(Request.Form("trueID" & Sn),0)
 		If CheckFlag = "1" Then
 			Title = Left(Replace(Title,"|",""),50)
+			SaveData = Replace(Replace(Left(Replace(SaveData,"|",""),10240),"<" & "%","&lt;%"),"%" & ">","%&gt;")
 			If Title = "" Then Title = "无标题"
 			If isNumeric(RecordCount) = 0 Then RecordCount = 10
 			RecordCount = cCur(Fix(RecordCount))
@@ -550,19 +750,36 @@ Sub Side_UpdateFormData
 				If isNumeric(OtherInfo) = 0 Then OtherInfo = 54
 				OtherInfo = cCur(Fix(OtherInfo))
 			End If
-			Tmp = Sn + 1 & "|" & Title & "|" & RecordCount
+			If Sn > 4 Then
+				Tmp = "999|" & Title & "|" & RecordCount
+			Else
+				Tmp = Sn + 1 & "|" & Title & "|" & RecordCount
+			End If
 			If OtherInfo <> "" Then Tmp = Tmp & "|" & OtherInfo
 			
-			Set Rs = LDExeCute("Select * from LeadBBS_Setup where RID=01000 and ValueStr like '" & Sn + 1 & "|%'",0)
-			If Not Rs.Eof Then
-				CALL LDExeCute("Update LeadBBS_Setup Set ValueStr='" & Replace(Tmp,"'","''") & "',ClassNum=" & Sort & " where RID=01000 and ValueStr like '" & Sn + 1 & "|%'",1)
+			If trueID = 0 Then
+				Set Rs = LDExeCute("Select * from LeadBBS_Setup where RID=01000 and ValueStr like '" & Sn + 1 & "|%'",0)
+				If Not Rs.Eof Then
+					CALL LDExeCute("Update LeadBBS_Setup Set ValueStr='" & Replace(Tmp,"'","''") & "',ClassNum=" & Sort & " where RID=01000 and ValueStr like '" & Sn + 1 & "|%'",1)
+				Else
+					CALL LDExeCute("insert into LeadBBS_Setup(RID,ValueStr,ClassNum,SaveData) Values(01000,'" & Replace(Tmp,"'","''") & "'," & Sort & ",'')",1)
+				End If
 			Else
-				CALL LDExeCute("insert into LeadBBS_Setup(RID,ValueStr,ClassNum) Values(01000,'" & Replace(Tmp,"'","''") & "'," & Sort & ")",1)
+				Set Rs = LDExeCute("Select * from LeadBBS_Setup where RID=01000 and id=" & trueID,0)
+				If Not Rs.Eof Then
+					CALL LDExeCute("Update LeadBBS_Setup Set ValueStr='" & Replace(Tmp,"'","''") & "',ClassNum=" & Sort & ",SaveData='" & Replace(SaveData,"'","''") & "' where RID=01000 and id=" & trueID,1)
+				Else
+					CALL LDExeCute("insert into LeadBBS_Setup(RID,ValueStr,ClassNum,SaveData) Values(01000,'" & Replace(Tmp,"'","''") & "'," & Sort & ",'" & Replace(SaveData,"'","''") & "')",1)
+				End If
 			End If
 			Rs.Close
 			Set Rs = Nothing
 		Else
-			CALL LDExeCute("delete from LeadBBS_Setup where RID=01000 and ValueStr like '" & Sn + 1 & "|%'",1)
+			If trueID = 0 Then
+				if Sn <= 4 then CALL LDExeCute("delete from LeadBBS_Setup where RID=01000 and ValueStr like '" & Sn + 1 & "|%'",1)
+			Else
+				CALL LDExeCute("delete from LeadBBS_Setup where RID=01000 and id=" & trueID,1)
+			End If
 		End If
 	Next
 	Side_UpdateFileData
@@ -596,7 +813,7 @@ Sub Side_UpdateFormData
 			If Not Rs.Eof Then
 				CALL LDExeCute("Update LeadBBS_Setup Set ValueStr='" & Replace(Tmp,"'","''") & "',ClassNum=" & Sort & " where RID=01003 and ValueStr like '" & Sn + 1 & "|%'",1)
 			Else
-				CALL LDExeCute("insert into LeadBBS_Setup(RID,ValueStr,ClassNum) Values(01003,'" & Replace(Tmp,"'","''") & "'," & Sort & ")",1)
+				CALL LDExeCute("insert into LeadBBS_Setup(RID,ValueStr,ClassNum,SaveData) Values(01003,'" & Replace(Tmp,"'","''") & "'," & Sort & ",'')",1)
 			End If
 			Rs.Close
 			Set Rs = Nothing
@@ -625,7 +842,7 @@ Sub Side_UpdateFileData
 	Set Rs = Nothing
 	
 	Dim m
-	Dim Title,RecordCount,OtherInfo,Tmp,SideType
+	Dim Title,RecordCount,OtherInfo,Tmp,SideType,SaveData
 	
 	Dim Str
 	Str = "<" & "%" & VbCrLf
@@ -636,6 +853,7 @@ Sub Side_UpdateFileData
 			Title = Tmp(1)
 			RecordCount = Tmp(2)
 		End If
+		SaveData = Replace(Replace(Replace(Replace(Replace(Replace(Side_Data(4,m) & "",VbCrLf,""),chr(0),""),chr(13),""),"""",""""""),"<script","<sc"" & ""ript"),"/script","/sc"" & ""ript")
 		If Ubound(Tmp,1) >= 3 Then OtherInfo = Tmp(3)
 		Select Case cCur(SideType)
 			Case 1:			
@@ -658,10 +876,14 @@ Sub Side_UpdateFileData
 				"""			<div class=""""title""""><b>" & htmlencode(Title) & "</b></div>"" & VbCrLf &_" & VbCrLf &_
 				"""			"" & Topic_PicInfo(140,105," & RecordCount & ") & VbCrLf &_" & VbCrLf &_
 				"""		</div>"" & VbCrLf" & VbCrLf
-			Case 5:			
+			Case 5:
 				Str = Str & "Str = Str & ""		<div class=""""content_side_box"""">"" & VbCrLf &_" & VbCrLf &_
 				"""			<div class=""""title""""><b>" & htmlencode(Title) & "</b></div>"" & VbCrLf &_" & VbCrLf &_
 				"""			"" & Topic_AnnounceList(0," & RecordCount & ",0,""yes"",""2"",""0"","""") & VbCrLf &_" & VbCrLf &_
+				"""		</div>"" & VbCrLf" & VbCrLf
+			Case Else				
+				Str = Str & "Str = Str & ""		<div class=""""content_side_box"""">"" & VbCrLf &_" & VbCrLf &_
+				"""			<div class=""""content"""">" & SaveData & "</b></div>"" & VbCrLf &_" & VbCrLf &_
 				"""		</div>"" & VbCrLf" & VbCrLf
 		End Select
 	Next

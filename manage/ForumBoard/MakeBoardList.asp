@@ -19,9 +19,7 @@ If GBL_CHK_Flag=1 Then
 	If Request.Form("submitflag") = "yes" then
 		UpdateBoardAnnounceNum2
 		ReloadBoardListData
-		MakeBoardList "BoardJump.asp","b.asp"
-		MakeBoardList "BoardJump2.asp","b2.asp"
-		MakeBoardList_For_MoveAnnounce
+		Update_boardCacheData
 		Response.Write "<div class=alertdone>重新制作论坛列表完毕！</div>" & VbCrLf
 	Else
 		%>

@@ -159,15 +159,15 @@ Function NewMessageForm
 	End If
 	
 	Dim Url
-	Url = Left(Request("dir"),100)
+	Url = filterUrlstr(Left(Request("dir"),100))
 	If Request("dir") = "" Then
 		Url = DEF_BBS_HomeUrl
 	End If
 	%></div>
-
-	<form method="post" action="<%=Url%>User/SendMessage.asp" id="LeadBBSFm" name="LeadBBSFm" onSubmit="return(submitonce(this));"<%
+	<form method="post" action="<%=Url%>User/SendMessage.asp" id="LeadBBSFm" name="LeadBBSFm"<%
 	If AjaxFlag = 1 Then
-		Response.Write " target=""hidden_frame"""
+		Response.Write " target=""hidden_frame"""%> onSubmit="sutmitflag=1;submit_disable(this);return true;"<%
+	Else%> onSubmit="return(submitonce(this));"<%
 	End If
 	%>>
 	<input type=hidden name=AjaxFlag value="<%=AjaxFlag%>">

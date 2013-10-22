@@ -5,10 +5,12 @@ Response.AddHeader "pragma","no-cache"
 Response.AddHeader "cache-control","private" 
 Response.CacheControl = "no-cache"
 
+Dim DEF_pageHeader : DEF_pageHeader = "<" & "%" & "@ LANGUAGE=" & "VBScript CodePage=936%" & ">" & VbCrLf & "<" & "%Response.Charset = ""gb2312""%" & ">"
+
 Sub displayVerifycode
 
 	Dim Url
-	Url = Left(Request("dir"),100)
+	Url = filterUrlstr(Left(Request("dir"),100))
 	If Request("dir") = "" Then
 		Url = DEF_BBS_HomeUrl
 	End If

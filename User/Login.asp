@@ -89,7 +89,7 @@ End Sub
 Sub LoginAccuessFul
 
 	Dim u
-	u = Request("u")
+	u = filterUrlstr(Request("u"))
 	If u = "" Then u = "../Boards.asp"
 	
 	If AjaxFlag = 1 Then
@@ -192,9 +192,9 @@ Sub Main_Logout
 		closeDatabase
 		
 		Dim u
-		u = Request("u")
+		u = filterUrlstr(Request("u"))
 		If u = "" Then
-			u = Lcase(Request.ServerVariables("HTTP_REFERER"))
+			u = filterUrlstr(Lcase(Request.ServerVariables("HTTP_REFERER")))
 			
 			Dim HomeUrl
 			HomeUrl = "http://"&Request.ServerVariables("server_name")
@@ -247,9 +247,9 @@ Sub Main_Hidden
 	If GBL_UserID=0 Then GBL_CHK_TempStr = GBL_CHK_TempStr & "ÄúÃ»ÓÐµÇÂ¼!" & VbCrLf
 	
 	Dim u
-	u = Request("u")
+	u = filterUrlstr(Request("u"))
 	If u = "" Then
-		u = Lcase(Request.ServerVariables("HTTP_REFERER"))
+		u = filterUrlstr(Lcase(Request.ServerVariables("HTTP_REFERER")))
 		
 		Dim HomeUrl
 		HomeUrl = "http://"&Request.ServerVariables("server_name")

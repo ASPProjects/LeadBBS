@@ -57,7 +57,7 @@ $id = function(id){
 	return document.getElementById(id);
 }
 
-$$ = document.getElementsByClassName = function(classname,tag){
+$$ = function(classname,tag){
 	var elems,alls,ta;
 	if(tag!="undefined"&&!isUndef(tag)&&tag!=null&&tag!="")
 	ta = tag;
@@ -610,8 +610,8 @@ LD.Cookie={
 
 	Del:function(name,flag){
 	        var date=new Date();
-	        date.setTime(date.getTime()-10000);	        
-	        document.cookie=name+"=; expires="+date.toUTCString()+";domain="+this.Domain();
+	        date.setTime(date.getTime()-10000);
+	        document.cookie=name+"=; expires="+date.toUTCString()+";domain="+this.Domain()+";path=/";
 	},
 	Clear:function()
 	{
@@ -789,7 +789,7 @@ function getAJAX(url,str,lb,ty,execut)
 			else
 			{
 				var tmp = "<p>Page error: " + HR.statusText +"<\/p>";
-				$id('errorstr').innerHTML=HR.responseText;
+				if($id('errorstr'))$id('errorstr').innerHTML=HR.responseText;
 				if(ty==1)
 					eval(lb);
 				else
@@ -1185,7 +1185,7 @@ function layer_create(menu,center,title,file)
 				tj.className = "layer_alertmsg";
 			}
 			else
-			{tj.innerHTML="<div unselectable=on class=\"ajaxitemtitle fire unsel\" style=\"cursor: move;\" onmousedown=\"LD.move.mousedown(this.parentNode,event);\"><span id=\"" + menu + "title\" unselectable=on class=\"title unsel\"></span><div class=\"layer_close\"><a href=\"javascript:;\" onclick=\"if(1000==" + center + "){if(confirm('\u63D0\u9192\uFF1A\u6B64\u64CD\u4F5C\u5C06\u5173\u95ED\u5F53\u524D\u7A97\u53E3\u3002')){layer_hidelayer($id('" + menu + "'));return false;}}else{layer_hidelayer($id('" + menu + "'));return false;}\" class=\"unsel\" hidefocus=\"true\" title=\"close\" /></a></div></div><div class=\"ajaxitembody\">loading...</div>";
+			{tj.innerHTML="<div unselectable=on class=\"ajaxitemtitle fire unsel\" style=\"cursor: move;\" onmousedown=\"LD.move.mousedown(this.parentNode,event);\"><span id=\"" + menu + "title\" unselectable=on class=\"title unsel\"></span><div class=\"layer_close\"><a href=\"javascript:;\" onclick=\"if(1000==" + center + "&&($('.ajaxitembody textarea')&&typeof $('.ajaxitembody textarea').html()!='undefined')){if(confirm('\u63D0\u9192\uFF1A\u6B64\u64CD\u4F5C\u5C06\u5173\u95ED\u5F53\u524D\u7A97\u53E3\u3002')){layer_hidelayer($id('" + menu + "'));return false;}}else{layer_hidelayer($id('" + menu + "'));return false;}\" class=\"unsel\" hidefocus=\"true\" title=\"close\" /></a></div></div><div class=\"ajaxitembody\">loading...</div>";
 			tj.className = "layer_ajaxitem";
 			}
 		}
@@ -1256,7 +1256,7 @@ function layer_view(title,obj,w,h,menu,file,js,fresh,filepara,center,posx,evl,ev
 		else{
 			evlajax="$('" + menu + "').style.display='block';"
 		}
-		if(center==1)evlajax+="setCenterDiv($id('" + menu + "'));";
+		if(center>=1)evlajax+="setCenterDiv($id('" + menu + "'));";
 		if(!isUndef(filepara))
 		{
 			if(isUndef(evl))
@@ -1301,7 +1301,7 @@ function layer_view(title,obj,w,h,menu,file,js,fresh,filepara,center,posx,evl,ev
 			if(layer_olditem=="")return;
 		}
 	}
-	if(center==1)
+	if(center>=1)
 	{
 		//setCenterDiv(menuobj);
 	}
@@ -1442,45 +1442,17 @@ function SelectItemByValue(objSelect, objItemText)
 	}
 }
 
-var maxjsreload = 6,jsreloadcount=0;
-// rerun script command and js file
-function js_Reload(obj)
-{
-	var child=obj.getElementsByTagName("SCRIPT");
-	var importFlag = 0;
-	for(var i=0;i<child.length;i++)
-	{
-		if(child[i].src)
-		{
-			$import(child[i].src+" ","js","ld_reloadjs"+i,function(){
-				jsreloadcount++;
-				if(jsreloadcount<maxjsreload)js_Reload(obj);
-			},i);
-			importFlag = 1;
-		}
-		else
-		{
-			if(child[i].innerHTML.replace(/(\n|\r|\ |\t|\f)/g, "")=="")
-			{
-			}
-			else
-			eval(child[i].innerHTML);
-		}
-	}
-	if(importFlag == 0)
-	{
-		jsreloadcount++;
-		if(jsreloadcount<maxjsreload)js_Reload(obj);
-	}
-}
-
 $(document).ready(function() {
        // focus on the first text input field in the first field on the page
-       if(typeof edt_win!="undefined")edt_win.focus();
+       if(typeof edt_win!="undefined" && edt_win!=null)edt_win.focus();
 	else
         {
+        	if(typeof edt_txtobj!="undefined" && edt_txtobj)edt_txtobj.focus();
+      	else
+      		{
         	var s=$("input[type='text']:first", document.forms[0]);
         	if($(s)&&($(s).attr("class"))&&($(s).attr("class").indexOf("notfocus")==-1))
         	$(s).focus();
+        		}
         }
 });

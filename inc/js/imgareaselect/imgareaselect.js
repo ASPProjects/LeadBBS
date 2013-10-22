@@ -1373,22 +1373,29 @@ var zoomimg = function(evt,a)
 					
 					function upload_resetajax(s)
 					{
-						if(s=="error"||s=="ok")
+						if(s=="error"||s=="ok"||s=="ok2")
 						{
 							if(s=="ok")
 							{
 								alert("成功更新头像！");
-								document.location="usermodify.asp?action=uploadface";
+								//document.location="usermodify.asp?action=uploadface";
 								return;
 							}
 							else
-							{alert("上传失败，请确认是否为图像文件．");
-							$id("upload_filename").value="";}
+							{
+								if(s=="ok2")
+								alert("成功修改.");
+								else{
+									alert("上传失败，请确认是否为图像文件．");
+									$id("upload_filename").value="";
+								}
+							}
 						}
 						else
 						{
 							var ss = s+"?ver="+Math.random();
 							$id("faceimg").src=ss;
+							if(ss.indexOf("temp") == -1)$("#Form_FaceUrl").attr("value",s);
 							$id("upload_filename").value=s;
 
 							var imgPreloader = new Image();

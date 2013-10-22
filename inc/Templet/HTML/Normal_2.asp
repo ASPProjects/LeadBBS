@@ -163,31 +163,10 @@
 
 		Response.Write "<li class=""level""><img src=""" & DEF_BBS_HomeUrl & "images/" & GBL_DefineImage & "lvstar/level" & GetData(23,N) & ".gif"" class=""a_levelimg"" title=""级别 " & DEF_UserLevelString(GetData(23,N)) & """ alt=""级别"" /></li>"
 
-		Response.Write "</ul><ul class=""info_two"">"
-		If GetData(15,n) > 0 Then
-			If GetData(27,n)<>"0" and GetData(27,n) <> "" Then
-				Response.write "<li><span class=""name"">" & DEF_PointsName(9) & "</span><span class=""value"">" & Replace(DisplayOfficerString(GetData(27,n)),",","</span></li><li><span class=""name"">&nbsp;</span><span class=""value"">") & "</span></li>"
-			End If
-			If tmp1 <> "" Then Response.Write "<li>" & tmp1 & "</li>"
-			'Response.write "<li><span class=""name"">级别</span><span class=""value"">" & DEF_UserLevelString(GetData(23,N)) & "</span></li>"
-
-			GetData(47,n) = cCur(GetData(47,n))
-			If GetData(47,n) <> 0 Then
-				If GetData(47,n) < 0 Then
-					GetData(47,n) = GetData(47,n)
-				Else
-					GetData(47,n) = "<span class=""bluefont value"">＋" & GetData(47,n) & "</span>"
-				End If
-				Response.write "<li><span class=""name"">" & DEF_PointsName(2) & "</span>" & GetData(47,n) & "</li>"
-			End If
-			If cCur(GetData(48,n)) <> 0 Then Response.Write "<li><span class=""name"">" & DEF_PointsName(1) & "</span><span class=""value"">" & GetData(48,n) & "</span></li>"
-
-			Response.Write "<li><span class=""name"">" & DEF_PointsName(0) & "</span><span class=""value"">" & GetData(26,n) & "</span></li>"
-			Response.Write "<li><span class=""name"">" & DEF_PointsName(4) & "</span><span class=""value"">" & CLng(cCur(GetData(28,n))/60) & "</span></li>"
-			Response.Write "<li><span class=""name"">文章</span><span class=""value"">" & GetData(33,n) & "</span></li>"
-			Response.Write "<li><span class=""name"">注册</span><span class=""value"">" & Mid(RestoreTime(GetData(30,n)),1,10) & "</span></li>"
-		End If
-		Response.Write "<li><span>"
+		Response.Write "</ul>"
+		
+		
+		Response.Write "<ul class=""info_3""><li><span>"
 		If GetData(15,n) > 0 Then Response.Write "<a href=""" & DEF_BBS_HomeUrl & "User/SendMessage.asp?SdM_ToUser=" & urlencode(GetData(14,n)) & """ onclick=""return(sendprivatemsg(this,'" & DEF_BBS_HomeUrl & "'));""><img src=""../images/" & GBL_DefineImage & "message.GIF"" alt=""给" & htmlencode(GetData(14,n)) & "发消息"" class=""absmiddle"" /></a>"
 		If trim(GetData(24,n))<>"" Then
 			If Left(lcase(GetData(24,n)),4)<>"http" Then GetData(24,n) = "http://" & GetData(24,n)
@@ -203,8 +182,35 @@
 		If GBL_CHK_User <> "" and GetData(15,n) > 0 Then
 			%><a href="Processor.asp?action=AddFriend&FriendName=<%=UrlEncode(GetData(14,n))%>&b=<%=GBL_Board_ID%>&ID=<%=GetData(0,n)%>" onclick="return(a_msg(this,'<%Response.Write "AddFriend&FriendName=" & UrlEncode(GetData(14,n))%>&SureFlag=1'));"><img src="../images/<%=GBL_DefineImage%>friend.gif" alt="加为好友" class="absmiddle" /></a><%
 		End If
-		Response.Write "</span></li>"
-		%></ul></div>
+		Response.Write "</span></li></ul>"
+		
+		Response.Write "<ul class=""info_two"">"
+		If GetData(15,n) > 0 Then
+			If GetData(27,n)<>"0" and GetData(27,n) <> "" Then
+				Response.write "<li><span class=""name"">" & DEF_PointsName(9) & "</span><span class=""value"">" & Replace(DisplayOfficerString(GetData(27,n)),",","</span></li><li><span class=""name"">&nbsp;</span><span class=""value"">") & "</span></li>"
+			End If
+			If tmp1 <> "" Then Response.Write "<li>" & tmp1 & "</li>"
+			'Response.write "<li><span class=""name"">级别</span><span class=""value"">" & DEF_UserLevelString(GetData(23,N)) & "</span></li>"
+
+			GetData(47,n) = cCur(GetData(47,n))
+			If GetData(47,n) <> 0 Then
+				If GetData(47,n) < 0 Then
+					GetData(47,n) = GetData(47,n)
+				Else
+					GetData(47,n) = "<span class=""bluefont value"">＋" & GetData(47,n) & "</span>"
+				End If
+				Response.write "<li><span class=""name"">" & DEF_PointsName(2) & "</span><span class=""value"">" & GetData(47,n) & "</span></li>"
+			End If
+			If cCur(GetData(48,n)) <> 0 Then Response.Write "<li><span class=""name"">" & DEF_PointsName(1) & "</span><span class=""value"">" & GetData(48,n) & "</span></li>"
+
+			Response.Write "<li><span class=""name"">" & DEF_PointsName(0) & "</span><span class=""value"">" & GetData(26,n) & "</span></li>"
+			Response.Write "<li><span class=""name"">" & DEF_PointsName(4) & "</span><span class=""value"">" & CLng(cCur(GetData(28,n))/60) & "</span></li>"
+			Response.Write "<li><span class=""name"">文章</span><span class=""value"">" & GetData(33,n) & "</span></li>"
+			Response.Write "<li><span class=""name"">注册</span><span class=""value"">" & Mid(RestoreTime(GetData(30,n)),1,10) & "</span></li>"
+		End If
+		Response.Write "</ul>"
+		%>
+		</div>
 		
 		</td>
 		<td class="tdright a_topiccontent" valign="top">

@@ -11,7 +11,6 @@ CheckSupervisorPass
 Dim Form_SavePoints
 Dim Form_DEF_ManageDir
 Dim Form_DEF_BBS_Name
-Dim Form_DEF_BBS_DarkColor,Form_DEF_BBS_LightDarkColor,Form_DEF_BBS_Color,Form_DEF_BBS_LightColor,Form_DEF_BBS_LightestColor,Form_DEF_BBS_TableHeadColor
 Dim Form_DEF_BBS_MaxLayer,Form_DEF_UsedDataBase,Form_DEF_BBS_SearchMode
 
 Dim Form_DEF_BBS_AnnouncePoints,Form_DEF_BBS_PrizeAnnouncePoints,Form_DEF_BBS_MakeGoodAnnouncePoints,Form_DEF_BBS_MaxTopAnnounce,Form_DEF_BBS_MaxAllTopAnnounce
@@ -45,7 +44,7 @@ Dim DEF_PointsNameBak
 DEF_PointsNameBak = Array("积分","魅力","威望","等级","经验","认证会员","总版主","区版主","论坛版主","荣誉","专业用户")
 
 Dim DEF_Sideparameter_String,Form_DEF_Sideparameter
-DEF_Sideparameter_String = Array("侧栏-首页禁止显示","侧栏-首页允许显示的情况下默认关闭状态(用户可通过点击显示)","侧栏-版面开启显示","侧栏-版面开启显示的情况下默认关闭状态(用户可通过点击显示)","版块-版块帖子多页回复链接显示详细页(默认仅显示尾页)","<span class=grayfont>保留项</span>","<span class=grayfont>保留项</span>","<span class=grayfont>保留项</span>","<span class=grayfont>保留项</span>","启用互联功能(比如腾讯QQ互联,需要配置扩展参数)","<span class=grayfont>保留项</span>","<span class=grayfont>保留项</span>","<span class=grayfont>保留项</span>","<span class=grayfont>保留项</span>","<span class=grayfont>保留项</span>","启用Rewrite伪静态(启用此项，确保空间已正确安装并设置Rewrite)","启用版面侧栏的版块导航","启用查看帖子页面侧栏的版块导航","版块主题列表默认仅显示作者")
+DEF_Sideparameter_String = Array("侧栏设置","1|侧栏-首页禁止显示","2|侧栏-首页允许显示的情况下默认关闭状态(用户可通过点击显示)","3|侧栏-版面开启显示","4|侧栏-版面开启显示的情况下默认关闭状态(用户可通过点击显示)","其它选项","5|版块-版块帖子多页回复链接显示详细页(默认仅显示尾页)","6|启用版块在线人数(禁止后将不再始终跟踪用户当前处于哪个版面)","7|启用LeadBBS.bbsCode编码转换","8|<span class=grayfont>保留项</span>","9|<span class=grayfont>保留项</span>","10|启用互联功能(比如腾讯QQ互联,需要配置扩展参数)","11|<span class=grayfont>保留项</span>","12|<span class=grayfont>保留项</span>","13|<span class=grayfont>保留项</span>","14|<span class=grayfont>保留项</span>","15|<span class=grayfont>保留项</span>","16|启用Rewrite伪静态(启用此项，确保空间已正确安装并设置Rewrite)","17|启用版面侧栏的版块导航","18|启用查看帖子页面侧栏的版块导航","19|版块主题列表默认仅显示作者")
 
 GetDefaultValue
 
@@ -117,35 +116,7 @@ Function DisplayDatabaseLink
 			<td class=tdbox>管理目录</td>
 			<td class=tdbox><input class=fminpt type="text" name="Form_DEF_ManageDir" maxlength="30" size="30" value="<%=htmlencode(Form_DEF_ManageDir)%>"><span class=note>(论坛使用的目录，默认为manage，注意真实的管理目录与此保持一至)</span></td>
 		</tr>
-		<tr bgcolor=<%=DEF_BBS_LightColor%> class=TBBG1>
-			<td class=tdbox colspan=2>配色方案(为某些浏览器不支持样式表而设定)</td>
-		</tr>
-		<tr>
-			<td class=tdbox>黑 暗 色</td>
-			<td class=tdbox><input class=fminpt type="text" name="Form_DEF_BBS_DarkColor" maxlength="255" size="30" value="<%=htmlencode(Form_DEF_BBS_DarkColor)%>"><span class=note>(DEF_BBS_DarkColor)</span></td>
-		</tr>
-		<tr>
-			<td class=tdbox>淡 黑 色</td>
-			<td class=tdbox><input class=fminpt type="text" name="Form_DEF_BBS_LightDarkColor" maxlength="255" size="30" value="<%=htmlencode(Form_DEF_BBS_LightDarkColor)%>"><span class=note>(DEF_BBS_LightDarkColor)</span></td>
-		</tr>
-		<tr>
-			<td class=tdbox>论坛颜色</td>
-			<td class=tdbox><input class=fminpt type="text" name="Form_DEF_BBS_Color" maxlength="255" size="30" value="<%=htmlencode(Form_DEF_BBS_Color)%>"><span class=note>(DEF_BBS_Color)</span></td>
-		</tr>
-		<tr>
-			<td class=tdbox>淡 颜 色</td>
-			<td class=tdbox><input class=fminpt type="text" name="Form_DEF_BBS_LightColor" maxlength="255" size="30" value="<%=htmlencode(Form_DEF_BBS_LightColor)%>"><span class=note>(DEF_BBS_LightColor)</span></td>
-		</tr>
-		<tr>
-			<td class=tdbox>最 淡 色</td>
-			<td class=tdbox><input class=fminpt type="text" name="Form_DEF_BBS_LightestColor" maxlength="255" size="30" value="<%=htmlencode(Form_DEF_BBS_LightestColor)%>"><span class=note>(DEF_BBS_LightestColor，背景色)</span></td>
-		</tr>
-		<tr>
-			<td class=tdbox>表格头色</td>
-			<td class=tdbox><input class=fminpt type="text" name="Form_DEF_BBS_TableHeadColor" maxlength="255" size="30" value="<%=htmlencode(Form_DEF_BBS_TableHeadColor)%>"><span class=note>(DEF_BBS_TableHeadColor)</span></td>
-		</tr>
-
-		<tr bgcolor=<%=DEF_BBS_LightColor%> class=TBBG1>
+		<tr class=TBBG1>
 			<td class=tdbox colspan=2>其它参数</td>
 		</tr>
 		<tr>
@@ -541,18 +512,28 @@ Function DisplayDatabaseLink
 			<td class=tdbox width=80>侧栏及更多设置</td>
 			<td class=tdbox valign=top>
 				<ul><%
+				Dim indexN,InfoText,tmpArr
 				for n = 0 to Ubound(DEF_Sideparameter_String,1)
-					If instr(DEF_Sideparameter_String(n),"<span") = 0 Then%>
-					<li><span class="grayfont"><%
-					If n < 9 Then Response.Write "0"
-					Response.Write n+1%></span><input type="checkbox" class=fmchkbox name="SideLimit<%=n+1%>" value="1"<%
-					If instr(DEF_Sideparameter_String(n),"<span") Then Response.Write " disabled=""disabled"""
-					If GetBinarybit(Form_DEF_Sideparameter,n+1) = 1 Then
-						Response.Write " checked>"
+					If inStr(DEF_Sideparameter_String(n),"|") <= 0 Then
+						%>
+						</ul><b><%=DEF_Sideparameter_String(n)%></b><ul>
+						<%
 					Else
-						Response.Write ">"
-					End If%><%=DEF_Sideparameter_String(n)%></li>
-					<%
+						tmpArr = Split(DEF_Sideparameter_String(n),"|")
+						IndexN = tmpArr(0)
+						InfoText = tmpArr(1)
+						If instr(InfoText,"<span") = 0 Then%>
+						<li><span class="grayfont"><%
+						If IndexN <= 9 Then Response.Write "0"
+						Response.Write IndexN%></span><input type="checkbox" class=fmchkbox name="SideLimit<%=IndexN%>" value="1"<%
+						If instr(InfoText,"<span") Then Response.Write " disabled=""disabled"""
+						If GetBinarybit(Form_DEF_Sideparameter,IndexN) = 1 Then
+							Response.Write " checked>"
+						Else
+							Response.Write ">"
+						End If%><%=InfoText%></li>
+						<%
+						End If
 					End If
 				Next%></ul></td>
 		</tr>
@@ -580,12 +561,6 @@ Function GetDefaultValue
 	End If
 	Form_DEF_BBS_Name = DEF_BBS_Name
 	Form_DEF_ManageDir = DEF_ManageDir
-	Form_DEF_BBS_DarkColor = DEF_BBS_DarkColor
-	Form_DEF_BBS_LightDarkColor = DEF_BBS_LightDarkColor
-	Form_DEF_BBS_Color = DEF_BBS_Color
-	Form_DEF_BBS_LightColor = DEF_BBS_LightColor
-	Form_DEF_BBS_LightestColor = DEF_BBS_LightestColor
-	Form_DEF_BBS_TableHeadColor = DEF_BBS_TableHeadColor
 
 	Form_DEF_BBS_MaxLayer = DEF_BBS_MaxLayer
 	Form_DEF_UsedDataBase = DEF_UsedDataBase
@@ -667,12 +642,6 @@ Function GetFormValue
 
 	Form_DEF_ManageDir = Trim(Request.Form("Form_DEF_ManageDir"))
 	Form_DEF_BBS_Name = Trim(Request.Form("Form_DEF_BBS_Name"))
-	Form_DEF_BBS_DarkColor = Trim(Request.Form("Form_DEF_BBS_DarkColor"))
-	Form_DEF_BBS_LightDarkColor = Trim(Request.Form("Form_DEF_BBS_LightDarkColor"))
-	Form_DEF_BBS_Color = Trim(Request.Form("Form_DEF_BBS_Color"))
-	Form_DEF_BBS_LightColor = Trim(Request.Form("Form_DEF_BBS_LightColor"))
-	Form_DEF_BBS_LightestColor = Trim(Request.Form("Form_DEF_BBS_LightestColor"))
-	Form_DEF_BBS_TableHeadColor = Trim(Request.Form("Form_DEF_BBS_TableHeadColor"))
 
 	Form_DEF_BBS_MaxLayer = Trim(Request.Form("Form_DEF_BBS_MaxLayer"))
 	Form_DEF_UsedDataBase = Trim(Request.Form("Form_DEF_UsedDataBase"))
@@ -766,12 +735,6 @@ Function GetFormValue
 	If inStr(Form_DEF_ManageDir,"%") Then GBL_CHK_TempStr = "管理目录不能包含百分号<br>" & VbCrLf
 	If inStr(Form_DEF_BBS_Name,"%") Then GBL_CHK_TempStr = "论坛名称不能包含百分号<br>" & VbCrLf
 	If inStr(Form_DEF_SiteHomeUrl,"%") Then GBL_CHK_TempStr = "网站首页不能包含百分号<br>" & VbCrLf
-	If inStr(Form_DEF_BBS_DarkColor,"%") Then GBL_CHK_TempStr = "黑 暗 色不能包含百分号<br>" & VbCrLf
-	If inStr(Form_DEF_BBS_LightDarkColor,"%") Then GBL_CHK_TempStr = "淡 黑 色不能包含百分号<br>" & VbCrLf
-	If inStr(Form_DEF_BBS_Color,"%") Then GBL_CHK_TempStr = "论坛颜色不能包含百分号<br>" & VbCrLf
-	If inStr(Form_DEF_BBS_LightColor,"%") Then GBL_CHK_TempStr = "淡 颜 色不能包含百分号<br>" & VbCrLf
-	If inStr(Form_DEF_BBS_LightestColor,"%") Then GBL_CHK_TempStr = "最 淡 色不能包含百分号<br>" & VbCrLf
-	If inStr(Form_DEF_BBS_TableHeadColor,"%") Then GBL_CHK_TempStr = "表格头色不能包含百分号<br>" & VbCrLf
 	If isNumeric(Form_DEF_BBS_MaxLayer) = 0 Then GBL_CHK_TempStr = "回复级数必须为数字<br>" & VbCrLf
 
 	If isNumeric(Form_DEF_UsedDataBase) = 0 Then GBL_CHK_TempStr = "数 据 库必须为数字<br>" & VbCrLf
@@ -883,12 +846,6 @@ Function MakeDataBaseLinkFile
 
 	TempStr = TempStr & "DEF_BBS_HomeUrl = " & Chr(34) & Chr(34) & VbCrLf
 	TempStr = TempStr & "DEF_SiteHomeUrl = " & Chr(34) & ReplaceStr(Form_DEF_SiteHomeUrl) & Chr(34) & VbCrLf
-	TempStr = TempStr & "const DEF_BBS_DarkColor = " & Chr(34) & Form_DEF_BBS_DarkColor & Chr(34) & VbCrLf
-	TempStr = TempStr & "const DEF_BBS_LightDarkColor = " & Chr(34) & Form_DEF_BBS_LightDarkColor & Chr(34) & VbCrLf
-	TempStr = TempStr & "const DEF_BBS_Color = " & Chr(34) & Form_DEF_BBS_Color & Chr(34) & VbCrLf
-	TempStr = TempStr & "const DEF_BBS_LightColor = " & Chr(34) & Form_DEF_BBS_LightColor & Chr(34) & VbCrLf
-	TempStr = TempStr & "const DEF_BBS_LightestColor = " & Chr(34) & Form_DEF_BBS_LightestColor & chr(34) & VbCrLf
-	TempStr = TempStr & "const DEF_BBS_TableHeadColor = " & Chr(34) & Form_DEF_BBS_TableHeadColor & Chr(34) & VbCrLf
 	TempStr = TempStr & "const DEF_BBS_MaxLayer = " & Form_DEF_BBS_MaxLayer & VbCrLf
 	TempStr = TempStr & "const DEF_UsedDataBase = " & Form_DEF_UsedDataBase & VbCrLf
 	TempStr = TempStr & "const DEF_BBS_SearchMode = " & Form_DEF_BBS_SearchMode & VbCrLf
@@ -1000,6 +957,7 @@ Function MakeDataBaseLinkFile
 	TempStr = TempStr & "Dim DEF_GBL_Description" & VbCrLf
 	TempStr = TempStr & "DEF_GBL_Description = " & Chr(34) & ReplaceStr(Form_DEF_GBL_Description) & Chr(34) & VbCrLf
 	TempStr = TempStr & "Const DEF_Sideparameter = " & ReplaceStr(Form_DEF_Sideparameter) & VbCrLf
+	TempStr = TempStr & "Const DEF_InstallDir = """ & ReplaceStr(DEF_InstallDir) & """" & VbCrLf
 
 	TempStr = TempStr & "%" & chr(62) & VbCrLf
 

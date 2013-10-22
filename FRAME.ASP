@@ -1,11 +1,11 @@
 <!-- #include file=inc/BBSsetup.asp -->
 <%
 Dim GBL_FrameUrl
-GBL_FrameUrl = Request.QueryString("u")
+GBL_FrameUrl = filterUrlstr(Request.QueryString("u"))
 If GBL_FrameUrl = "" Then
 	GBL_FrameUrl = "http://" & LCase(Request.ServerVariables("server_name")) & Replace(LCase(Request.Servervariables("SCRIPT_NAME")),"frame.asp","")
 	If Left(LCase(Request.ServerVariables("HTTP_REFERER")),Len(GBL_FrameUrl)) = GBL_FrameUrl Then
-		GBL_FrameUrl = Request.ServerVariables("HTTP_REFERER")
+		GBL_FrameUrl = filterUrlstr(Request.ServerVariables("HTTP_REFERER"))
 	Else
 		GBL_FrameUrl = "Boards.asp"
 	End If

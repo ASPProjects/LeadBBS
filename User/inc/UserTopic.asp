@@ -1,5 +1,5 @@
 <%
-Const LMT_MaxMessageNumber = 5001 '用户收件箱允许的最多接收记录，超过将无法接收新消息。
+Const LMT_MaxMessageNumber = 5000 '用户收件箱允许的最多接收记录，超过将无法接收新消息。
 
 Sub DisplayUserCenter(info)
 
@@ -24,6 +24,7 @@ Sub DisplayUserCenter(info)
 			<li><a href=<%=DEF_BBS_HomeUrl%>User/LookUserInfo.asp>个人信息</a></li>
 			<li><a href=<%=DEF_BBS_HomeUrl%>User/MyInfoBox.asp>短消息</a></li>
 			<li><a href=<%=DEF_BBS_HomeUrl%>User/LookUserInfo.asp?Evol=f>我的好友</a></li>
+			<li><a href=<%=DEF_BBS_HomeUrl%>User/LookUserInfo.asp?Evol=bind>绑定网站</a></li>
 			</ul>
 			<div class="swap_collapse" onclick="swap_view('master_part_2',this);"><span>帖子与附件</span></div>
 			<ul id="master_part_2">
@@ -102,7 +103,7 @@ Else
 End If
 
 Dim Url
-Url = Left(Request("dir"),100)
+Url = filterUrlstr(Left(Request("dir"),100))
 If Url = "" and (inStr(Request.QueryString,"dir=") = 0) and (inStr(Request.form,"dir=") = 0) Then
 	Url = DEF_BBS_HomeUrl
 End If
@@ -139,7 +140,7 @@ command = Left(request("command"),5)
 		Else
 			Dim HomeUrl,u
 			HomeUrl = "http://"&Request.ServerVariables("server_name")
-			u = Request.QueryString("u")
+			u = filterUrlstr(Request.QueryString("u"))
 			If Left(u,1) <> "/" and Left(u,1) <> "\" and Left(u,Len(HomeUrl)) <> HomeUrl Then u = ""
 			If u = "" Then
 				u = Lcase(Request.ServerVariables("HTTP_REFERER"))

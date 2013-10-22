@@ -414,9 +414,7 @@ Function DeleteForumBoard(BoardID)
 	End If
 	ReloadBoardListData
 
-	MakeBoardList "BoardJump.asp","b.asp"
-	MakeBoardList "BoardJump2.asp","b2.asp"
-	MakeBoardList_For_MoveAnnounce
+	Update_boardCacheData
 
 End Function
 
@@ -452,9 +450,7 @@ Function InsertForumBoard
 	ReloadBoardInfo(GBL_BoardID)
 	ReloadBoardListData
 
-	MakeBoardList "BoardJump.asp","b.asp"
-	MakeBoardList "BoardJump2.asp","b2.asp"
-	MakeBoardList_For_MoveAnnounce
+	Update_boardCacheData
 
 	InsertForumBoard = 1
 
@@ -565,9 +561,7 @@ Function UpdateForumBoard
 	ReloadBoardInfo(GBL_GetData(0,0))
 	ReloadBoardListData
 
-	MakeBoardList "BoardJump.asp","b.asp"
-	MakeBoardList "BoardJump2.asp","b2.asp"
-	MakeBoardList_For_MoveAnnounce
+	Update_boardCacheData
 
 	UpdateForumBoard = 1
 
@@ -823,6 +817,15 @@ Function UpdateParentBoardStrColumn(ParentOld,ParentNew,BoardID)
 
 End Function
 
+Sub Update_boardCacheData
+
+		MakeBoardList "BoardJump.asp","b.asp"
+		MakeBoardList "BoardJump2.asp","b2.asp"
+		MakeBoardList "BoardForMoveList.asp",""
+		MakeBoardList "data_boardlist.asp",""
+
+End Sub
+
 Function MakeBoardList(savefile,filename)
 
 	Dim Rs,GetData,BoardNum
@@ -842,7 +845,8 @@ Function MakeBoardList(savefile,filename)
 	TempStr = ""
 
 	Dim N,WriteStr,LastFlag
-If savefile <> "BoardJump2.asp" Then
+select case savefile
+case "BoardJump.asp":
 	TempStr = TempStr & "	" & Chr(60) & "script type=""text/javascript"">" & VbCrLf
 	TempStr = TempStr & "	<!--" & VbCrLf
 	TempStr = TempStr & "	function surfto1(list)" & VbCrLf
@@ -925,7 +929,7 @@ If savefile <> "BoardJump2.asp" Then
 	End If
 
 	TempStr = TempStr & "	</select>" & VbCrLf
-Else	
+Case "BoardJump2.asp":
 	If BoardNum = -1 Then
 	Else
 		CurrentAssosrt = -1183
@@ -942,7 +946,150 @@ Else
 		Next
 		if CurrentAssosrt <> -1183 Then TempStr = TempStr & "</ul>"
 	End If
-end if
+case "BoardForMoveList.asp":
+	TempStr = TempStr & "	<select name=""BoardID2"">" & VbCrLf
+	TempStr = TempStr & "		<option value=""0"">选择版面…</option>" & VbCrLf
+
+	If BoardNum = -1 Then
+	Else
+		CurrentAssosrt = -1183
+		LastAssosrt = cCur(GetData(1,BoardNum))
+		For N = 0 to BoardNum
+			WriteStr = ""
+			If CurrentAssosrt<>cCur(GetData(1,N)) Then
+				CurrentAssosrt = cCur(GetData(1,N))
+				If LastAssosrt = CurrentAssosrt Then
+					WriteStr = "└┬"
+				Else
+					WriteStr = "├┬"
+				End If
+				If ViewSelectListFlag = 1 Then WriteStr = "＋"
+				TempStr = TempStr & "		<option value=""0"">" & WriteStr & KillHTMLLabel(GetData(15,N)) & "" & VbCrLf
+			End If
+			If N >= BoardNum Then
+				If LastAssosrt = CurrentAssosrt Then
+					If GetData(16,n) & ""  = "" Then
+						WriteStr = "　└"
+					Else
+						WriteStr = "　├"
+					End if
+				Else
+					WriteStr = "│└"
+				End If
+
+				If ViewSelectListFlag = 1 Then
+					WriteStr = "　"
+					If GetData(16,n) & "" <> "" Then WriteStr = "　＋"
+				End If
+			Else
+				If CurrentAssosrt<>cCur(GetData(1,N+1)) Then
+					If LastAssosrt = CurrentAssosrt Then
+						WriteStr = "　└"
+					Else
+						WriteStr = "│└"
+					End If
+				Else
+					If LastAssosrt = CurrentAssosrt Then
+						WriteStr = "　├"
+					Else
+						WriteStr = "│├"
+					End If
+				End If
+				If ViewSelectListFlag = 1 Then
+					WriteStr = "　"
+					If GetData(16,n) & "" <> "" Then WriteStr = "　＋"
+				End If
+			End If
+			WriteStr = WriteStr & KillHTMLLabel(GetData(2,N))
+			If StrLength(WriteStr) > 21 Then
+				WriteStr = LeftTrue(WriteStr,18) & "..."
+			End If
+			TempStr = TempStr & "		<option value=" & GetData(0,N) & ">" & WriteStr & "" & VbCrLf
+			GBL_LowBoardString = ""
+			GBL_LoopN = 0
+			GetLowBoardString_Move GetData(16,n)
+			If GBL_LowBoardString <> "" Then TempStr = TempStr & GBL_LowBoardString
+			
+		Next
+	End If
+
+	TempStr = TempStr & "	</select>" & VbCrLf
+case "data_boardlist.asp"
+	TempStr = TempStr & "["
+
+	If BoardNum = -1 Then
+	Else
+		CurrentAssosrt = -1183
+		LastAssosrt = cCur(GetData(1,BoardNum))
+		For N = 0 to BoardNum
+			WriteStr = ""
+			If CurrentAssosrt<>cCur(GetData(1,N)) Then
+				CurrentAssosrt = cCur(GetData(1,N))
+				If LastAssosrt = CurrentAssosrt Then
+					WriteStr = "└┬"
+				Else
+					WriteStr = "├┬"
+				End If
+				If ViewSelectListFlag = 1 Then WriteStr = "＋"
+				If N = 0 Then
+					TempStr = TempStr & "{" & VbCrLf
+				Else
+					TempStr = TempStr & ",{" & VbCrLf
+				End If
+				TempStr = TempStr & "	""id"":0," & VbCrLf
+				TempStr = TempStr & "	""text"":""" & WriteStr & htmlencode(KillHTMLLabel(GetData(15,N))) & """" & VbCrLf & "}"
+			End If
+			If N >= BoardNum Then
+				If LastAssosrt = CurrentAssosrt Then
+					If GetData(16,n) & ""  = "" Then
+						WriteStr = "　└"
+					Else
+						WriteStr = "　├"
+					End if
+				Else
+					WriteStr = "│└"
+				End If
+
+				If ViewSelectListFlag = 1 Then
+					WriteStr = "　"
+					If GetData(16,n) & "" <> "" Then WriteStr = "　＋"
+				End If
+			Else
+				If CurrentAssosrt<>cCur(GetData(1,N+1)) Then
+					If LastAssosrt = CurrentAssosrt Then
+						WriteStr = "　└"
+					Else
+						WriteStr = "│└"
+					End If
+				Else
+					If LastAssosrt = CurrentAssosrt Then
+						WriteStr = "　├"
+					Else
+						WriteStr = "│├"
+					End If
+				End If
+				If ViewSelectListFlag = 1 Then
+					WriteStr = "　"
+					If GetData(16,n) & "" <> "" Then WriteStr = "　＋"
+				End If
+			End If
+			WriteStr = WriteStr & KillHTMLLabel(GetData(2,N))
+			If StrLength(WriteStr) > 21 Then
+				WriteStr = LeftTrue(WriteStr,18) & "..."
+			End If			
+			TempStr = TempStr & ",{" & VbCrLf
+			TempStr = TempStr & "	""id"":" & GetData(0,N) & "," & VbCrLf
+			TempStr = TempStr & "	""text"":""" & htmlencode(WriteStr) & """" & VbCrLf & "}"
+			GBL_LowBoardString = ""
+			GBL_LoopN = 0
+			GetLowBoardString_Json GetData(16,n)
+			If GBL_LowBoardString <> "" Then TempStr = TempStr & GBL_LowBoardString
+			
+		Next
+	End If
+
+	TempStr = DEF_pageHeader & TempStr & "]"
+end select
 	
 	ADODB_SaveToFile TempStr,"../../inc/IncHtm/" & savefile & ""
 	If GBL_CHK_TempStr = "" Then
@@ -1066,104 +1213,62 @@ Function GetLowBoardString_Move(LowBoardStr)
 	
 End Function
 
-Function MakeBoardList_For_MoveAnnounce
 
-	Dim Rs,GetData,BoardNum
-	Set Rs = LDExeCute("Select BoardID,BoardAssort,BoardName,BoardIntro,LastWriter,LastWriteTime,TopicNum,AnnounceNum,ForumPass,HiddenFlag,LastAnnounceID,LastTopicName,MasterList,BoardLimit,LeadBBS_Assort.AssortID,LeadBBS_Assort.AssortName,LowerBoard from LeadBBS_Boards left join LeadBBS_Assort on LeadBBS_Assort.AssortID=LeadBBS_Boards.BoardAssort where LeadBBS_Boards.ParentBoard=0 and LeadBBS_Boards.HiddenFlag = 0 order by LeadBBS_Boards.BoardAssort,LeadBBS_Boards.OrderID ASC",0)
-	If Not Rs.Eof Then
-		GetData = Rs.GetRows(-1)
-		BoardNum = Ubound(GetData,2)
-	Else
-		BoardNum = -1
-	End If
-	Rs.Close
-	Set Rs = Nothing
+Function GetLowBoardString_Json(LowBoardStr)
 
-	'on error resume next
-	Dim TempStr
-	TempStr = ""
+	If LowBoardStr = "" or isNull(LowBoardStr) or GBL_LoopN > 100 Then Exit Function
+	GBL_LoopN = GBL_LoopN + 1
+	Dim BoardNum,LowArray,N
+	LowArray = Split(LowBoardStr,",")
+	BoardNum = Ubound(LowArray,1)
 
-	TempStr = TempStr & "	<select name=""BoardID2"">" & VbCrLf
-	TempStr = TempStr & "		<option value=""0"">选择版面…</option>" & VbCrLf
-
-	If BoardNum = -1 Then
-	Else
-		Dim CurrentAssosrt,N
-		CurrentAssosrt = -1183
-		Dim LastAssosrt,WriteStr
-		LastAssosrt = cCur(GetData(1,BoardNum))
-		Dim LastFlag
-		For N = 0 to BoardNum
-			WriteStr = ""
-			If CurrentAssosrt<>cCur(GetData(1,N)) Then
-				CurrentAssosrt = cCur(GetData(1,N))
-				If LastAssosrt = CurrentAssosrt Then
-					WriteStr = "└┬"
-				Else
-					WriteStr = "├┬"
-				End If
-				If ViewSelectListFlag = 1 Then WriteStr = "＋"
-				TempStr = TempStr & "		<option value=""0"">" & WriteStr & KillHTMLLabel(GetData(15,N)) & "" & VbCrLf
-			End If
-			If N >= BoardNum Then
-				If LastAssosrt = CurrentAssosrt Then
-					If GetData(16,n) & ""  = "" Then
-						WriteStr = "　└"
-					Else
-						WriteStr = "　├"
-					End if
-				Else
-					WriteStr = "│└"
-				End If
-
-				If ViewSelectListFlag = 1 Then
-					WriteStr = "　"
-					If GetData(16,n) & "" <> "" Then WriteStr = "　＋"
-				End If
-			Else
-				If CurrentAssosrt<>cCur(GetData(1,N+1)) Then
+	Dim Temp
+	Dim WriteStr
+	For N = 0 to BoardNum
+		Temp = Application(DEF_MasterCookies & "BoardInfo" & LowArray(N))
+		If isArray(Temp) = False Then
+			ReloadBoardInfo(LowArray(N))
+			Temp = Application(DEF_MasterCookies & "BoardInfo" & LowArray(N))
+		End If
+		If isArray(Temp) = True Then
+			If Temp(8,0) = 0 Then
+				If N >= BoardNum Then
 					If LastAssosrt = CurrentAssosrt Then
-						WriteStr = "　└"
+						WriteStr = "│" & String(GBL_LoopN, "│") & "├"
 					Else
-						WriteStr = "│└"
+						WriteStr = "│" & String(GBL_LoopN, "│") & "├"
 					End If
 				Else
 					If LastAssosrt = CurrentAssosrt Then
-						WriteStr = "　├"
-					Else
 						WriteStr = "│├"
+					Else
+						WriteStr = "│" & String(GBL_LoopN, "│") & "├"
 					End If
 				End If
 				If ViewSelectListFlag = 1 Then
-					WriteStr = "　"
-					If GetData(16,n) & "" <> "" Then WriteStr = "　＋"
+					If Temp(27,0) & "" <> "" Then
+						WriteStr = String(GBL_LoopN + 1, "　") & "＋"
+					Else
+						WriteStr = String(GBL_LoopN + 1, "　")
+					End If
 				End If
+				'WriteStr = String(GBL_LoopN, "　") & WriteStr
+				WriteStr = WriteStr & KillHTMLLabel(Temp(0,0))
+				If StrLength(WriteStr) > 21 Then
+					WriteStr = LeftTrue(WriteStr,18) & "..."
+				End If
+				GBL_LowBoardString = GBL_LowBoardString & ",{" & VbCrLf
+				GBL_LowBoardString = GBL_LowBoardString & "	""id"":" & LowArray(N) & "," & VbCrLf
+				GBL_LowBoardString = GBL_LowBoardString & "	""text"":""" & htmlencode(WriteStr) & """" & VbCrLf & "}"
+				GetLowBoardString_Json Temp(27,0)
 			End If
-			WriteStr = WriteStr & KillHTMLLabel(GetData(2,N))
-			If StrLength(WriteStr) > 21 Then
-				WriteStr = LeftTrue(WriteStr,18) & "..."
-			End If
-			TempStr = TempStr & "		<option value=" & GetData(0,N) & ">" & WriteStr & "" & VbCrLf
-			GBL_LowBoardString = ""
-			GBL_LoopN = 0
-			GetLowBoardString_Move GetData(16,n)
-			If GBL_LowBoardString <> "" Then TempStr = TempStr & GBL_LowBoardString
-			
-		Next
-	End If
-
-	TempStr = TempStr & "	</select>" & VbCrLf
-
-	ADODB_SaveToFile TempStr,"../../inc/IncHtm/BoardForMoveList.asp"
-	If GBL_CHK_TempStr = "" Then
-		Response.Write "<br><font color=Green class=greenfont>2.成功更新文件inc/IncHtm/BoardForMoveList.asp！</font>"
-	Else
-		%><p>服务器不支持在线写入文件功能，请使用FTP等功能，<br>将<font color=Red Class=redfont>inc/IncHtm/BoardForMoveList.asp</font>文件替换成框中内容(注意备份)<p>
-		<textarea name="fileContent" cols="80" rows="20" class=fmtxtra><%=Server.htmlencode(TempStr)%></textarea><%
-		GBL_CHK_TempStr = ""
-	End If
-
+		End If
+	Next
+		
+	GBL_LoopN = GBL_LoopN - 1
+	
 End Function
+
 
 Function SetBinarybit(Number,bit,value)
 

@@ -2,9 +2,11 @@
 <!-- #include file=../inc/Board_Popfun.asp -->
 <!-- #include file=../inc/Limit_Fun.asp -->
 <!-- #include file=../inc/Upload_Setup.asp -->
+<!-- #include file=../article/inc/cms_setup.asp -->
 <%
 DEF_BBS_HomeUrl = "../"
 Const LMT_RedirectFile = 1 '附件显示方式：0,读取下载，隐藏真实地址但性能稍差 1.转址下载 高性能但暴露真实地址
+Const DEF_GuestEnable = error '是否允许游客查看附件：0,禁止，1.允许
 
 Main
 
@@ -20,7 +22,7 @@ End Sub
 
 Class DownLoad_File
 
-Private ID,BoardID,VisitIP,PhotoDir,SPhotoDir,FileName,FileSize,FileType,isDown,isSmall,UserID,CheckFlag
+Private ID,BoardID,VisitIP,PhotoDir,SPhotoDir,FileName,FileSize,FileType,isDown,isSmall,UserID,CheckFlag,GetType
 Public ErrStr
 
 Private Sub GetUpladInfo
@@ -57,7 +59,16 @@ Private Sub GetUpladInfo
 	End If
 	InitDatabase
 
-	Set Rs = LDExeCute("Select UserID,PhotoDir,SPhotoDir,FileType,FileName,FileSize,BoardID,VisitIP from LeadBBS_Upload where id=" & ID,0)
+	If Request.querystring("type") <> "1" then
+		GetType = 0
+	Else
+		GetType = 1
+	End If
+	If GetType = 0 then
+		Set Rs = LDExeCute("Select UserID,PhotoDir,SPhotoDir,FileType,FileName,FileSize,BoardID,VisitIP from LeadBBS_Upload where id=" & ID,0)
+	Else
+		Set Rs = LDExeCute("Select UserID,PhotoDir,SPhotoDir,FileType,FileName,FileSize,BoardID,VisitIP from article_Upload where id=" & ID,0)
+	End If
 	If Rs.Eof Then
 		ID = 0
 	Else
@@ -85,7 +96,7 @@ Private Sub GetUpladInfo
 		CheckisBoardMaster
 		CheckAccessLimit
 		CheckAccessLimit_TimeLimit
-		
+
 		If GBL_CHK_TempStr <> "" Then
 			ErrStr = "附件下载失败，" & GBL_CHK_TempStr
 			CloseDatabase
@@ -94,16 +105,21 @@ Private Sub GetUpladInfo
 		End If
 	End If
 	
-	If PhotoDir <> "" and FileType <> 0 and VisitIP <> GBL_IPAddress Then
-		'If DEF_DownSpend > 0 and DEF_DownSpend > GBL_CHK_Points Then
-		'	ErrStr = "下载附件失败,没有足够的" & DEF_PointsName(0) & "!"
-		'Else
-		'	If DEF_DownSpend > 0 and GBL_UserID <> UserID Then
-		'		CALL LDExeCute("Update LeadBBS_User Set Points=Points-" & DEF_DownSpend & " where id=" & GBL_UserID,1)
-		'		UpdateSessionValue 4,0-DEF_DownSpend,1
-		'	End If
-			CALL LDExeCute("Update LeadBBS_Upload Set Hits=Hits+1,VisitIP='" & Replace(GBL_IPAddress,"'","''") & "' where id=" & ID,1)
-		'End If
+	'If PhotoDir <> "" and FileType <> 0 and VisitIP <> GBL_IPAddress Then
+	'If PhotoDir <> "" and VisitIP <> GBL_IPAddress Then
+	'	If DEF_DownSpend > 0 and DEF_DownSpend > GBL_CHK_Points Then
+	'		ErrStr = "下载附件失败,没有足够的" & DEF_PointsName(0) & "!"
+	'	Else
+	'		If DEF_DownSpend > 0 and GBL_UserID <> UserID Then
+	'			CALL LDExeCute("Update LeadBBS_User Set Points=Points-" & DEF_DownSpend & " where id=" & GBL_UserID,1)
+	'			UpdateSessionValue 4,0-DEF_DownSpend,1
+	'		End If
+	'		CALL LDExeCute("Update LeadBBS_Upload Set Hits=Hits+1,VisitIP='" & Replace(GBL_IPAddress,"'","''") & "' where id=" & ID,1)
+	'	End If
+	'End If
+	If DEF_GuestEnable = 0 and GBL_UserID < 1 Then
+		CloseDatabase
+		Response.Redirect DEF_BBS_HomeUrl & "images/guest.gif"
 	End If
 	CloseDatabase
 	'If CheckFlag = 0 and isTrueDate(GBL_CookieTime) = 0 Then Response.Redirect DEF_BBS_HomeUrl & "images/logo.gif"
@@ -120,6 +136,13 @@ Public Sub GetFile
 	If ID = 0 Then
 		ErrStr = "获取附件失败."
 		Exit Sub
+	End If
+	
+	Dim DefineUploadDir
+	If GetType = 0 Then
+		DefineUploadDir = DEF_BBS_UploadPhotoUrl
+	Else
+		DefineUploadDir = DEF_CMS_UploadPhotoUrl
 	End If
 	
 	Dim Ext
@@ -140,18 +163,18 @@ Public Sub GetFile
 		End If
 		
 		If isSmall = 0 or SPhotoDir = "" Then
-			Response.Redirect DEF_BBS_HomeUrl & DEF_BBS_UploadPhotoUrl & PhotoDir
+			Response.Redirect DEF_BBS_HomeUrl & DefineUploadDir & PhotoDir
 		Else
-			Response.Redirect DEF_BBS_HomeUrl & DEF_BBS_UploadPhotoUrl & SPhotoDir
+			Response.Redirect DEF_BBS_HomeUrl & DefineUploadDir & SPhotoDir
 		End If
 		Exit Sub
 	End If
 	
 	Dim strFilename,S,Fso,F,intFilelength
 	If isSmall = 0 or SPhotoDir = "" Then
-		strFilename = Server.MapPath(Replace(DEF_BBS_HomeUrl & DEF_BBS_UploadPhotoUrl & PhotoDir,"/","\"))
+		strFilename = Server.MapPath(Replace(DEF_BBS_HomeUrl & DefineUploadDir & PhotoDir,"/","\"))
 	Else
-		strFilename = Server.MapPath(Replace(DEF_BBS_HomeUrl & DEF_BBS_UploadPhotoUrl & SPhotoDir,"/","\"))
+		strFilename = Server.MapPath(Replace(DEF_BBS_HomeUrl & DefineUploadDir & SPhotoDir,"/","\"))
 	End If
 	
 	Response.Clear
@@ -201,12 +224,12 @@ Public Sub GetFile
 		If isDown = 1 Then
 			Response.AddHeader "Content-Disposition","attachment;filename=" & FileName
 		End If
-		Response.AddHeader "Content-Length",intFilelength 
+		'Response.AddHeader "Content-Length",intFilelength 
 		Response.CharSet = "GB2312" 
 		Response.ContentType = "application/octet-stream"
 	Else
 		Response.AddHeader "Content-Disposition","filename=" & FileName
-		Response.AddHeader "Content-Length",intFilelength 
+		'Response.AddHeader "Content-Length",intFilelength 
 		Response.CharSet = "GB2312"
 		Response.ContentType = "image/" & Ext
 	End If

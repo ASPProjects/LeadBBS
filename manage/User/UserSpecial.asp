@@ -283,7 +283,7 @@ Function SpecialUserBrowser
 	</tr>
 	<%
 	for n= MinN to MaxN Step StepValue%>
-	<tr height="19" bgcolor="<%=DEF_BBS_LightestColor%>" class=TBBG9>
+	<tr height="19" class=TBBG9>
 		<td class=tdbox><%=GetData(0,n)%></td>
 		<td class=tdbox>
 			<a href=<%=DEF_BBS_HomeUrl%>User/LookUserInfo.asp?id=<%=GetData(1,n)%>><%=htmlencode(GetData(2,n))%></a>

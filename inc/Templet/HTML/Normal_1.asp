@@ -83,19 +83,19 @@ Public Sub Showhead
 		j.className=(j.className=='forum_options')?'forum_options_sim':'forum_options';
 		if(j.className=='forum_options')
 		{$id('table_options').className='tablebox table_options';
-		$("#forum_linehead").attr("colspan","4");}
+		$("#forum_linehead").attr("colspan","3");}
 		else
 		{$id('table_options').className='tablebox table_options_sim';
-		$("#forum_linehead").attr("colspan","2");}
+		$("#forum_linehead").attr("colspan","1");}
 		foption=(foption==0)?1:0;
 		LD.blist.assort_click('foption',foption,"none");
 	}
 	</script>
 	</td>
 	<%Response.Write "	<td><div class=""value"">主题</div></td>"
-	Response.Write "	<td width=""110"" class=""author""><div class=""value"">作者</div></td>"
-	Response.Write "	<td width=""74"" align=""center"" class=""hits""><div class=""value"">回复/阅读</div></td>"
-	Response.Write "	<td width=""110"" class=""reply""><div class=""value"">最后更新</div></td>"
+	Response.Write "	<td width=""110"" class=""author""><div class=""value"">作者/回复人</div></td>"
+	Response.Write "	<td width=""74"" class=""hits""><div class=""value"">回复/阅读</div></td>"
+	'Response.Write "	<td width=""110"" class=""reply""><div class=""value"">最后更新</div></td>"
 	Response.Write "</tr>"
 
 End Sub
@@ -109,9 +109,9 @@ Public Sub leadbbs(AllFlag,TopicID,ChildNum,Title,FaceIcon,G6,G7,G8,G9,G10,G11,G
 	If allflg = 1 and G11 < DEF_BTMI and AllFlag <> -1 and EFlag < 0 Then
 		Response.Write "<tr class=""tbhead2""><td><div class=""value"">&nbsp;</div></td><td colspan="""
 		If CFlag = 1 Then
-			Response.Write "2"
+			Response.Write "1"
 		Else
-			Response.Write "4"
+			Response.Write "3"
 		End If
 		Response.Write """ id=""forum_linehead""><div class=""value"">普通主题</div></td></tr>"
 		allflg = 2
@@ -182,6 +182,8 @@ Public Sub leadbbs(AllFlag,TopicID,ChildNum,Title,FaceIcon,G6,G7,G8,G9,G10,G11,G
 		G8 = "主题内容：" & G8 & "字节"
 	End If
 	If G17 <> 39 and G20 <> "" Then G8 = G8 & VbCrLf & "最后回复：" & HtmlEncode(G20)
+	
+	G8 = G8 & VbCrLf & "发表时间：" & ConvertSimTimeString(Mid(G21,1,4) & "-" & Mid(G21,5,2) & "-" & Mid(G21,7,2) & " " & Mid(G21,9,2) & ":" & Mid(G21,11,2))
 
 	Temp1 = Fix((ChildNum+1)/DEF_TCMLN)
 	If Temp1 < ((ChildNum+1)/DEF_TCMLN) Then Temp1 = Temp1 + 1
@@ -268,8 +270,6 @@ End If
 	End If
 	Response.Write "</a></span>"
 
-
-
 	If ChildNum >= DEF_TCMLN Then
 		If RewriteFlag = 0 Then
 			CALL pagesplit("../a/a.asp?b=" & G16 & "&amp;id=" & TopicID & "",Temp1)
@@ -289,7 +289,7 @@ End If
 
 	If ccur(G15) = 1 Then Response.Write "<img src=""../images/" & GDI & "jh1.GIF"" title=""精华帖子"" class=""absmiddle"" alt=""精华"" />"
 
-	
+	'If G17 <> 39 and G20 <> "" Then Response.Write "<br /><span class=""grayfont note"">" & HtmlEncode(G20) & "</span>"
 	Response.Write "<div id=""Lead" & old_TopicID & """ class=""b_smalllist"" style=""display: none""></div>"
 	Response.Write "</td><td class=""tdcontent author"">" & VbCrLf
 	If G10 > 0 Then
@@ -297,10 +297,25 @@ End If
 	Else
 		Response.Write "<span class=""postuser"">" & HtmlEncode(G9) & "</span>"
 	End If
-	Response.Write "<br /><em>"
-	Response.Write ConvertTimeString(Mid(G21,1,4) & "-" & Mid(G21,5,2) & "-" & Mid(G21,7,2) & " " & Mid(G21,9,2) & ":" & Mid(G21,11,2))
-	Response.Write "</em>"
-	Response.Write "</td><td align=""center"" class=""tdcontent hits"">" & VbCrLf
+	Response.Write "<br />"
+	If ChildNum = 0 Then
+		Response.Write "<span class=""lastuser"">- - -</span>"
+	Else
+		If G13 = "" or G13 = null Then
+			If G17 = 39 Then
+				Response.Write G9
+			Else
+				Response.Write "<a href=""../User/LookUserInfo.asp?ID=" & G10 & """ class=""lastuser"">" & HtmlEncode(G9) & "</a>"
+			End If
+		Else
+			If G13 <> "游客" Then
+				Response.Write "<a href=""../User/LookUserInfo.asp?name=" & urlEncode(G13) & """ class=""lastuser"">" & HtmlEncode(G13) & "</a>"
+			Else
+				Response.Write "<span class=""lastuser"">" & HtmlEncode(G13) & "</span>"
+			End If
+		End If
+	End If
+	Response.Write "</td><td class=""tdcontent hits"">" & VbCrLf
 
 	If G18 = null Then G18 = 0
 	If G17 = 80 Then
@@ -310,29 +325,17 @@ End If
 		If ChildNum >= 10000 Then ChildNum = "<span class=""bluefont"" title=""回帖:" & ChildNum & """>" & Fix(ChildNum/10000) & "</span>万"
 		Response.Write "<em>" & ChildNum & "/" & G7 & "</em>"
 	End If
-	Response.Write "</td><td class=""tdcontent reply"">"
-
 	If Left(G6,8) = B_Now Then
-		G6 = "<span class=""redfont"">" & ConvertTimeString(Mid(G6,1,4) & "-" & Mid(G6,5,2) & "-" & Mid(G6,7,2) & " " & Mid(G6,9,2) & ":" & Mid(G6,11,2)) & "</span>"
+		G6 = "<span class=""redfont"">" & ConvertSimTimeString(Mid(G6,1,4) & "-" & Mid(G6,5,2) & "-" & Mid(G6,7,2) & " " & Mid(G6,9,2) & ":" & Mid(G6,11,2)) & "</span>"
 	Else
-		G6 = ConvertTimeString(Mid(G6,1,4) & "-" & Mid(G6,5,2) & "-" & Mid(G6,7,2) & " " & Mid(G6,9,2) & ":" & Mid(G6,11,2))
+		G6 = ConvertSimTimeString(Mid(G6,1,4) & "-" & Mid(G6,5,2) & "-" & Mid(G6,7,2) & " " & Mid(G6,9,2) & ":" & Mid(G6,11,2))
 	End If
-	If G13 = "" or G13 = null Then
-		If G17 = 39 Then
-			Response.Write G9
-		Else
-			Response.Write "<a href=""../User/LookUserInfo.asp?ID=" & G10 & """ class=""lastuser"">" & HtmlEncode(G9) & "</a>"
-		End If
-	Else
-		If G13 <> "游客" Then
-			Response.Write "<a href=""../User/LookUserInfo.asp?name=" & urlEncode(G13) & """ class=""lastuser"">" & HtmlEncode(G13) & "</a>"
-		Else
-			Response.Write "<span class=""lastuser"">" & HtmlEncode(G13) & "</span>"
-		End If
-	End If
-	Response.Write "<br /><em>" & G6 & "</em>"
-	Response.Write "</td></tr>"
-	'Response.Write "<tr><td></td><td colspan=""4""><div id=""Lead" & old_TopicID & """ class=""b_smalllist"" style=""display: none""></div></td></tr>" & VbCrLf
+
+	Response.Write "<br /><em title=""最后更新"">" & G6 & "</em>"
+	Response.Write "</td>"
+
+	'Response.Write "<td class=""tdcontent reply""></td></tr>"
+	'Response.Write "<tr><td></td><td colspan=""3""><div id=""Lead" & old_TopicID & """ class=""b_smalllist"" style=""display: none""></div></td></tr>" & VbCrLf
 
 End Sub
 

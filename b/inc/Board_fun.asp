@@ -89,7 +89,6 @@ Function DisplayAnnouncesSplitPages_List
 
 	ALL_Count = GBL_Board_TopicNum
 
-
 	RootID = Left(Request.QueryString("RootID"),14)
 	If isNumeric(RootID)=0 Then RootID=0
 	RootID = cCur(RootID)

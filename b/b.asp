@@ -261,6 +261,7 @@ Sub B_Main
 	<div class="boardnavlist_sider">
 	<%
 	End If
+	
 	If GBL_CHK_TempStr = "" Then
 		UpdateOnlineUserAtInfo GBL_board_ID,GBL_Board_BoardName & " " & EString
 		If GetBinarybit(GBL_Board_BoardLimit,20) <> 1 Then
@@ -305,8 +306,12 @@ Sub B_Main
 						End If
 						%></span></a></li><%
 					End If
+				If GetBinarybit(DEF_Sideparameter,6) = 1 Then
 				%><li><a href="b.asp?B=<%=GBL_board_ID%>&amp;E=1" onclick="ShowOnline('follow0','swap_ol',1);return false;">
-					<span class="swap_ol<%If DEF_DisplayOnlineUser = 1 or DEF_DisplayOnlineUser = 3 Then Response.Write "_close"%>" id="swap_ol">在线<%=GetActiveUserNumber(GBL_Board_ID)%>人</span></a></li>
+				
+					<span class="swap_ol<%If DEF_DisplayOnlineUser = 1 or DEF_DisplayOnlineUser = 3 Then Response.Write "_close"%>" id="swap_ol">在线<%=GetActiveUserNumber(GBL_Board_ID)%>人</span></a>
+					</li>
+				<%end if%>
 					<li>
 					主题: <%=GBL_Board_TopicNum%> / 帖子: <%=GBL_Board_AnnounceNum%></li></ul>
 			</div>
@@ -343,15 +348,16 @@ Sub B_Main
 				<div class="b_box fire" id="followAssort" style="display: none">loading...</div>
 			<%
 			End If
-			If DEF_DisplayOnlineUser = 1 or DEF_DisplayOnlineUser = 3 Then%>
-				<div class="b_box fire" id="follow0" style="display: none">loading...</div>
-			<%End If%>
-			<%If DEF_DisplayOnlineUser = 2 Then%>
-				<div class="b_box fire" id="follow0" style="display: block">
-			          <%DisplayUserOnline GBL_Board_ID,"../"%>
-				</div><%
-			End If%>
-			<%
+			If GetBinarybit(DEF_Sideparameter,6) = 1 Then
+				If DEF_DisplayOnlineUser = 1 or DEF_DisplayOnlineUser = 3 Then%>
+					<div class="b_box fire" id="follow0" style="display: none">loading...</div>
+				<%End If%>
+				<%If DEF_DisplayOnlineUser = 2 Then%>
+					<div class="b_box fire" id="follow0" style="display: block">
+				          <%DisplayUserOnline GBL_Board_ID,"../"%>
+					</div><%
+				End If
+			end if
 			LoginAccuessFul
 		End If
 	Else
@@ -444,13 +450,15 @@ Sub Main
 
 	DEF_GBL_Description = KillHTMLLabel(EString & " " & GBL_Board_BoardName) & " " & DEF_SiteNameString
 	BBS_SiteHead DEF_SiteNameString & " - " & KillHTMLLabel(GBL_Board_BoardName),GBL_board_ID,EString
-
-	CheckAccessLimit
+	%><div class="area">
+	<div id="ad_boardtop"></div></div>
+	<%
 	If SideFlag = 1 or GBL_CHK_TempStr <> "" Then
 		Boards_Body_Head("")
 	Else
 		Boards_Body_Head("request" & SideNomal)
 	End If
+	CheckAccessLimit
 
 
 	B_Main
@@ -460,12 +468,34 @@ Sub Main
 	If GBL_CHK_TempStr <> "" Then
 		If GBL_ShowBottomSure = 0 Then GBL_SiteBottomString = ""
 	End If
+	%>
+	<div class="clear"></div>
+	<div class="area">
+	<div id="ad_boardbottom"></div></div>
+	<%
 	SiteBottom
 
 End Sub
 
+Function GetBoardIDbyEID(EID)
+
+	dim rs,sql
+	sql = sql_select("select ID,boardid from LeadBBS_GoodAssort where id=" & EID,1)
+	set rs = ldexecute(sql,0)
+	if rs.eof then
+		GetBoardIDbyEID = 0
+	else
+		GetBoardIDbyEID = ccur(rs(1))
+	end if
+
+End Function
+
 Function GetEName(ID)
 
+	If GBL_Board_ID = 0 Then
+		GBL_Board_ID = GetBoardIDbyEID(EID)
+		If GBL_Board_ID > 0 Then Borad_GetBoardIDValue(GBL_Board_ID)
+	End If
 	Dim TArray,N,Num
 	TArray = Application(DEF_MasterCookies & "BoardInfo" & GBL_Board_ID & "_TI")
 	If isArray(TArray) = False Then
